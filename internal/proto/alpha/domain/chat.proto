@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package domain;
 
-option go_package = "github.com/ivohutasoit/alira/common/message/domain";
+option go_package = "github.com/ivohutasoit/alira/model/domain";
 
 message Chat {
     string message = 1;

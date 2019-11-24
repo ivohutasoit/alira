@@ -5,9 +5,9 @@ package service;
 import "google/protobuf/empty.proto";
 import "google/protobuf/wrappers.proto";
 
-import "domain/chat.proto";
+import "model/domain/chat.proto";
 
-option go_package = "common/service";
+option go_package = "github.com/ivohutasoit/alira/service/alpha";
 
 service ChatService {
     rpc Send (google.protobuf.StringValue) returns (google.protobuf.Empty);
