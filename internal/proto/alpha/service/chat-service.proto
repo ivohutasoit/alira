@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package service;
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/wrappers.proto";
+
+import "domain/chat.proto";
+
+option go_package = "common/service";
+
+service ChatService {
+    rpc Send (google.protobuf.StringValue) returns (google.protobuf.Empty);
+
+    rpc Subscribe (google.protobuf.Empty) returns (stream domain.Chat);
+}

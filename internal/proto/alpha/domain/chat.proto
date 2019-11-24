@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package domain;
+
+option go_package = "github.com/ivohutasoit/alira/common/message/domain";
+
+message Chat {
+    string message = 1;
+}

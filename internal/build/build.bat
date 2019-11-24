@@ -1,0 +1,5 @@
+protoc chat.proto --proto_path=./internal/proto/alpha/domain --proto_path=./third_party --go_out=.
+protoc chat-service.proto --proto_path=./internal/proto/alpha/service --proto_path=./internal/proto/alpha --proto_path=./third_party --go_out=plugins=grpc:.
+protoc empty.proto timestamp.proto wrappers.proto --proto_path=./third_party/google/protobuf --plugin=protoc-gen-dart=C:/Users/raja.sihombing/AppData/Roaming/Pub/Cache/bin/protoc-gen-dart.bat --dart_out=grpc:alira_mobile/lib/google/protobuf
+protoc chat.proto --proto_path=./internal/proto/alpha/domain --proto_path=./third_party  --plugin=protoc-gen-dart=C:/Users/raja.sihombing/AppData/Roaming/Pub/Cache/bin/protoc-gen-dart.bat --dart_out=grpc:alira_mobile/lib/message/domain
+protoc chat-service.proto --proto_path=./internal/proto/alpha/service --proto_path=./third_party --proto_path=./internal/proto/alpha --plugin=protoc-gen-dart=C:/Users/raja.sihombing/AppData/Roaming/Pub/Cache/bin/protoc-gen-dart.bat --dart_out=grpc:alira_mobile/lib/service
