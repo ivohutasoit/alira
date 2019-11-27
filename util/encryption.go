@@ -42,6 +42,7 @@ func Decrypt(key []byte, encrypted []byte) (string, error) {
 		return "", errors.New("Invalid cipher text")
 	}
 	iv := cipherText[:aes.BlockSize]
+	cipherText = cipherText[aes.BlockSize:]
 	stream := cipher.NewCFBDecrypter(block, iv)
 	stream.XORKeyStream(cipherText, cipherText)
 
