@@ -8,7 +8,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"os"
 )
 
@@ -18,7 +17,7 @@ func Encrypt(args ...interface{}) (string, error) {
 	var plain []byte
 	var key []byte = []byte(os.Getenv("GLOBAL_SECRET_KEY"))
 	if 1 > len(args) {
-		log.Fatal("Not enough parameters.")
+		return "", errors.New("not enough parameters")
 	}
 
 	for i, p := range args {
@@ -26,17 +25,17 @@ func Encrypt(args ...interface{}) (string, error) {
 		case 0: //plain text
 			param, ok := p.(string)
 			if !ok {
-				log.Fatal("plain text parameter not type string.")
+				return "", errors.New("plain text parameter not type string")
 			}
 			plain = []byte(param)
 		case 1:
 			param, ok := p.(string)
 			if !ok {
-				log.Fatal("screet key parameter not type string.")
+				return "", errors.New("screet key parameter not type string")
 			}
 			key = []byte(param)
 		default:
-			log.Fatal("Wrong parameter count.")
+			return "", errors.New("wrong parameter count")
 		}
 	}
 	block, err := aes.NewCipher(key)
@@ -63,7 +62,7 @@ func Decrypt(args ...interface{}) (string, error) {
 	var err error
 	var key []byte = []byte(os.Getenv("GLOBAL_SECRET_KEY"))
 	if 1 > len(args) {
-		log.Fatal("Not enough parameters.")
+		return "", errors.New("not enough parameters")
 	}
 
 	for i, p := range args {
@@ -71,7 +70,7 @@ func Decrypt(args ...interface{}) (string, error) {
 		case 0: //plain text
 			param, ok := p.(string)
 			if !ok {
-				log.Fatal("Encrypted text parameter not type string.")
+				return "", errors.New("plain text parameter not type string")
 			}
 			cipherText, err = base64.URLEncoding.DecodeString(param)
 			if err != nil {
@@ -80,11 +79,11 @@ func Decrypt(args ...interface{}) (string, error) {
 		case 1:
 			param, ok := p.(string)
 			if !ok {
-				log.Fatal("screet key parameter not type string.")
+				return "", errors.New("screet key parameter not type string")
 			}
 			key = []byte(param)
 		default:
-			log.Fatal("Wrong parameter count.")
+			return "", errors.New("wrong parameter count")
 		}
 	}
 	block, err := aes.NewCipher(key)
@@ -93,7 +92,7 @@ func Decrypt(args ...interface{}) (string, error) {
 	}
 
 	if len(cipherText) < aes.BlockSize {
-		return "", errors.New("Invalid cipher text")
+		return "", errors.New("invalid cipher text")
 	}
 	iv := cipherText[:aes.BlockSize]
 	cipherText = cipherText[aes.BlockSize:]
