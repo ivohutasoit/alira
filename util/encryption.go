@@ -8,9 +8,37 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
+	"os"
 )
 
-func Encrypt(key []byte, plain []byte) (string, error) {
+// Encrypt function can be used to encrypt plain test using secret key
+// First parameter is mandatory
+func Encrypt(args ...interface{}) (string, error) {
+	var plain []byte
+	var key []byte = []byte(os.Getenv("GLOBAL_SECRET_KEY"))
+	if 1 > len(args) {
+		log.Fatal("Not enough parameters.")
+	}
+
+	for i, p := range args {
+		switch i {
+		case 0: //plain text
+			param, ok := p.(string)
+			if !ok {
+				log.Fatal("plain text parameter not type string.")
+			}
+			plain = []byte(param)
+		case 1:
+			param, ok := p.(string)
+			if !ok {
+				log.Fatal("screet key parameter not type string.")
+			}
+			key = []byte(param)
+		default:
+			log.Fatal("Wrong parameter count.")
+		}
+	}
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return "", err
@@ -28,10 +56,36 @@ func Encrypt(key []byte, plain []byte) (string, error) {
 	return base64.URLEncoding.EncodeToString(cipherText), nil
 }
 
-func Decrypt(key []byte, encrypted []byte) (string, error) {
-	cipherText, err := base64.URLEncoding.DecodeString(string(encrypted))
-	if err != nil {
-		return "", err
+// Decrypt function can be used to decrupt encrypted test using secret key
+// First parameter is mandatory
+func Decrypt(args ...interface{}) (string, error) {
+	var cipherText []byte
+	var err error
+	var key []byte = []byte(os.Getenv("GLOBAL_SECRET_KEY"))
+	if 1 > len(args) {
+		log.Fatal("Not enough parameters.")
+	}
+
+	for i, p := range args {
+		switch i {
+		case 0: //plain text
+			param, ok := p.(string)
+			if !ok {
+				log.Fatal("Encrypted text parameter not type string.")
+			}
+			cipherText, err = base64.URLEncoding.DecodeString(param)
+			if err != nil {
+				return "", err
+			}
+		case 1:
+			param, ok := p.(string)
+			if !ok {
+				log.Fatal("screet key parameter not type string.")
+			}
+			key = []byte(param)
+		default:
+			log.Fatal("Wrong parameter count.")
+		}
 	}
 	block, err := aes.NewCipher(key)
 	if err != nil {
