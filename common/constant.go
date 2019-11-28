@@ -1,4 +1,4 @@
-package util
+package common
 
 const (
 	letters           = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
