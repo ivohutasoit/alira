@@ -3,8 +3,8 @@ package util
 import (
 	"os"
 
+	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
-	"github.com/gorilla/sessions"
 	"github.com/markbates/goth/gothic"
 )
 
