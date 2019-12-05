@@ -15,7 +15,7 @@ import (
 // First parameter is mandatory
 func Encrypt(args ...interface{}) (string, error) {
 	var plain []byte
-	var key []byte = []byte(os.Getenv("GLOBAL_SECRET_KEY"))
+	var key []byte = []byte(os.Getenv("SECRET_KEY"))
 	if 1 > len(args) {
 		return "", errors.New("not enough parameters")
 	}
@@ -60,7 +60,7 @@ func Encrypt(args ...interface{}) (string, error) {
 func Decrypt(args ...interface{}) (string, error) {
 	var cipherText []byte
 	var err error
-	var key []byte = []byte(os.Getenv("GLOBAL_SECRET_KEY"))
+	var key []byte = []byte(os.Getenv("SECRET_KEY"))
 	if 1 > len(args) {
 		return "", errors.New("not enough parameters")
 	}
