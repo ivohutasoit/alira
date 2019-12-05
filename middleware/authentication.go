@@ -3,8 +3,8 @@ package middleware
 import (
 	"fmt"
 	"net/http"
-	"strings"
 	"os"
+	"strings"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
@@ -21,8 +21,8 @@ func AuthenticationRequired(args ...interface{}) gin.HandlerFunc {
 		token := session.Get("token")
 		if token == nil {
 			url := fmt.Sprintf("%s%s", c.Request.Host, c.Request.RequestURI)
-			fmt.Println(strings.Trim(url))
-			url, err := util.Encrypt(strings.Trim(url), os.Getenv("SECRET_KEY"))
+			fmt.Println(strings.TrimSpace(url))
+			url, err := util.Encrypt(strings.TrimSpace(url), os.Getenv("SECRET_KEY"))
 			if err != nil {
 				fmt.Println(err)
 			}
