@@ -2,6 +2,7 @@ package domain
 
 import (
 	"encoding/gob"
+	"github.com/dgrijalva/jwt-go"
 	"time"
 )
 
@@ -25,4 +26,9 @@ type User struct {
 	AvatarURL   string    `json:"avatar_url" bson:"avatar_url"`
 	CreatedAt   time.Time `json:"created_at" bson:"created_at"`
 	Active      bool      `json:"active" bson:"active"`
+}
+
+type UserToken struct {
+	jwt.StandardClaims
+	UserID string `json:"user_id"`
 }
