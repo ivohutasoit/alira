@@ -42,14 +42,23 @@ func SessionHeaderRequired(args ...interface{}) gin.HandlerFunc {
 		panic("authentication uri must be provided")
 	}
 	return func(c *gin.Context) {
+		excepts := []string{"/auth/login"}
+
+		currentPath := c.Request.URL.Path
+		for _, value := range excepts {
+			if strings.TrimSpace(value) == currentPath {
+				c.Next()
+				return
+			}
+		}
+
 		session := sessions.Default(c)
 		token := session.Get("token")
 		if token == nil {
-			url := fmt.Sprintf("%s%s", c.Request.Host, c.Request.URL.Path)
-			fmt.Println(strings.TrimSpace(url))
-			url, err := util.Encrypt(strings.TrimSpace(url), os.Getenv("SECRET_KEY"))
+			url, err := util.GenerateUrl(c.Request.TLS, c.Request.Host, c.Request.URL.Path, true)
 			if err != nil {
 				fmt.Println(err)
+				return
 			}
 			redirect := fmt.Sprintf("%s?redirect=%s", args[0].(string), url)
 			c.Redirect(http.StatusMovedPermanently, redirect)
