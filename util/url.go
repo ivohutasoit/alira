@@ -44,7 +44,7 @@ func GenerateUrl(args ...interface{}) (string, error) {
 			if !ok {
 				return "", errors.New("bool type required")
 			}
-			encrypted := param
+			encrypted = param
 		default:
 			return "", errors.New("wrong parameter count")
 		}
