@@ -51,7 +51,7 @@ func SessionHeaderRequired(args ...interface{}) gin.HandlerFunc {
 			if err != nil {
 				fmt.Println(err)
 			}
-			redirect := fmt.Sprintf("%s?source=%s", args[0].(string), url)
+			redirect := fmt.Sprintf("%s?redirect=%s", args[0].(string), url)
 			c.Redirect(http.StatusMovedPermanently, redirect)
 			c.Abort()
 			return
