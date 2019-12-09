@@ -2,15 +2,26 @@ syntax = "proto3";
 
 package service;
 
+import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
 import "google/protobuf/wrappers.proto";
 
-import "model/domain/chat.proto";
+import "domain/chat.proto";
 
-option go_package = "github.com/ivohutasoit/alira/service/alpha";
+//option go_package = "github.com/ivohutasoit/alira/service/alpha";
 
 service ChatService {
-    rpc Send (google.protobuf.StringValue) returns (google.protobuf.Empty);
+    rpc Send (google.protobuf.StringValue) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            post: "/alpha/chat/send"
+            body: "*"
+        };
+    }
 
-    rpc Subscribe (google.protobuf.Empty) returns (stream domain.Chat);
+    rpc Subscribe (google.protobuf.Empty) returns (stream domain.Chat) {
+        option (google.api.http) = {
+            post: "/alpha/chat/subscribe"
+            body: "*"
+        };
+    };
 }
