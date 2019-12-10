@@ -5,7 +5,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/ivohutasoit/alira/model/domain"
 	"github.com/jinzhu/gorm"
 	"github.com/joho/godotenv"
 )
@@ -49,8 +48,6 @@ func init() {
 	}
 
 	db = conn
-	db.Debug().AutoMigrate(&domain.user{})
-	db.Debug().AutoMigrate(&domain.UserProfile{})
 }
 
 func GetDatabase() *gorm.DB {
