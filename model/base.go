@@ -28,7 +28,7 @@ func init() {
 	engine := os.Getenv("DATABASE.ENGINE")
 	var conn *gorm.DB
 	if engine == "sqlite3" {
-		file := os.Getenv("DATABASE.file")
+		file := os.Getenv("DATABASE.FILE")
 		conn, err = gorm.Open(engine, file)
 	} else if engine == "postgres" {
 		host := os.Getenv("DATABASE.HOST")
