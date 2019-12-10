@@ -18,7 +18,7 @@ func GenerateUrl(args ...interface{}) (string, error) {
 	encrypted := false
 	for i, p := range args {
 		switch i {
-		case 0: //plain text
+		case 0:
 			param, ok := p.(*tls.ConnectionState)
 			if !ok {
 				return "", errors.New("connection state type required")
