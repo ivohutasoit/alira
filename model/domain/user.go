@@ -2,7 +2,6 @@ package domain
 
 import (
 	"encoding/gob"
-	"time"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/ivohutasoit/alira/model"
@@ -21,17 +20,16 @@ type UserToken struct {
 // User hold information about an user
 type User struct {
 	model.BaseModel
-	Username 	string 	`json:"username" bson:"username"`
-	Email 		string 	`json:"email" bson:"email"`
-	Mobile 		string 	`json:"mobile" bson:"mobile"`
-	Avatar 		string 	`json:"avatar" bson:"avatar"`
-	Active 		bool 	`json:"active" bson:"active"`
+	Username string `json:"username" bson:"username"`
+	Email    string `json:"email" bson:"email"`
+	Mobile   string `json:"mobile" bson:"mobile"`
+	Avatar   string `json:"avatar" bson:"avatar"`
+	Active   bool   `json:"active" bson:"active"`
 }
 
 func (User) TableName() string {
 	return "users"
 }
-
 
 type UserProfile struct {
 	model.BaseModel
