@@ -12,12 +12,12 @@ func init() {
 	gob.Register(&UserProfile{})
 }
 
-type AccessToken struct {
+type AccessTokenClaims struct {
 	jwt.StandardClaims
 	Admin bool
 }
 
-type RefreshToken struct {
+type RefreshTokenClaims struct {
 	jwt.StandardClaims
 	Sub int
 }
