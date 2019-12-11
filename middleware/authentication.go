@@ -164,6 +164,7 @@ func TokenHeaderRequired(args ...interface{}) gin.HandlerFunc {
 			c.Set("user_id", claims.(domain.AccessTokenClaims).Id)
 		} else if tokens[0] == "Refresh" {
 			c.Set("user_id", claims.(domain.RefreshTokenClaims).Id)
+			c.Set("sub", claims.(domain.RefreshTokenClaims).Sub)
 		}
 		c.Next()
 	}
