@@ -12,9 +12,14 @@ func init() {
 	gob.Register(&UserProfile{})
 }
 
-type UserToken struct {
+type AccessToken struct {
 	jwt.StandardClaims
-	UserID string `json:"user_id"`
+	Admin bool
+}
+
+type RefreshToken struct {
+	jwt.StandardClaims
+	Sub int
 }
 
 // User hold information about an user
