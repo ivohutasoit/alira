@@ -53,7 +53,7 @@ func SessionHeaderRequired(args ...interface{}) gin.HandlerFunc {
 		}
 
 		session := sessions.Default(c)
-		token := session.Get("token")
+		token := session.Get("access_token")
 		if token == nil {
 			url, err := util.GenerateUrl(c.Request.TLS, c.Request.Host, c.Request.URL.Path, true)
 			if err != nil {
