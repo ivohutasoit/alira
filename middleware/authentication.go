@@ -161,9 +161,9 @@ func TokenHeaderRequired(args ...interface{}) gin.HandlerFunc {
 		}
 
 		if tokens[0] == "Bearer" {
-			c.Set("userid", claims.(domain.AccessTokenClaims).Id)
+			c.Set("userid", claims.(*domain.AccessTokenClaims).Userid)
 		} else if tokens[0] == "Refresh" {
-			if claims.(domain.RefreshTokenClaims).Sub != 1 {
+			if claims.(*domain.RefreshTokenClaims).Sub != 1 {
 				c.Header("Content-Type", "application/json")
 				c.JSON(http.StatusUnauthorized, gin.H{
 					"code":   401,
@@ -173,8 +173,8 @@ func TokenHeaderRequired(args ...interface{}) gin.HandlerFunc {
 				c.Abort()
 				return
 			}
-			c.Set("userid", claims.(domain.RefreshTokenClaims).Id)
-			c.Set("sub", claims.(domain.RefreshTokenClaims).Sub)
+			c.Set("userid", claims.(*domain.RefreshTokenClaims).Userid)
+			c.Set("sub", claims.(*domain.RefreshTokenClaims).Sub)
 		}
 		c.Next()
 	}

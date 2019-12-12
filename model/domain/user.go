@@ -14,12 +14,14 @@ func init() {
 
 type AccessTokenClaims struct {
 	jwt.StandardClaims
-	Admin bool
+	Userid string
+	Admin  bool
 }
 
 type RefreshTokenClaims struct {
 	jwt.StandardClaims
-	Sub int
+	Userid string
+	Sub    int
 }
 
 // User hold information about an user
