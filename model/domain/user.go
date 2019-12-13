@@ -2,6 +2,7 @@ package domain
 
 import (
 	"encoding/gob"
+	"time"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/ivohutasoit/alira/model"
@@ -10,6 +11,7 @@ import (
 func init() {
 	gob.Register(&User{})
 	gob.Register(&UserProfile{})
+	gob.Register(&Token{})
 }
 
 type AccessTokenClaims struct {
@@ -49,4 +51,17 @@ type UserProfile struct {
 
 func (UserProfile) TableName() string {
 	return "profiles"
+}
+
+type Token struct {
+	model.BaseModel
+	Code      string    `json:"code" bson:"code"`
+	Purpose   string    `json:"purpose" bson:"purpose"`
+	UserID    string    `json:"user_id" bson:"user_id"`
+	ExpiredAt time.Time `json:"expired_at" bson:"expired_at"`
+	Valid     bool      `json:"valid" bson:"valid"`
+}
+
+func (Token) TableName() string {
+	return "tokens"
 }
