@@ -20,7 +20,7 @@ func (ms *MailService) Send(mail *domain.Mail) (map[interface{}]interface{}, err
 		body,
 	)
 	mailSMTP := fmt.Sprintf("%s:%s", os.Getenv("SMTP.HOST"), os.Getenv("SMTP.PORT"))
-	if err := smtp.SendMail(mailSMTP, smtp.PlainAuth("", mail.From,
+	if err := smtp.SendMail(mailSMTP, smtp.PlainAuth("", os.Getenv("SMTP.NAME"),
 		os.Getenv("SMTP.PASSWORD"), os.Getenv("SMTP.HOST")), mail.From,
 		mail.To, []byte(fullbody)); err != nil {
 		return nil, err
