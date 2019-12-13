@@ -53,7 +53,7 @@ func SessionHeaderRequired(args ...interface{}) gin.HandlerFunc {
 		}
 
 		session := sessions.Default(c)
-		token := session.Get("token")
+		token := session.Get("access_token")
 		if token == nil {
 			url, err := util.GenerateUrl(c.Request.TLS, c.Request.Host, c.Request.URL.Path, true)
 			if err != nil {
@@ -71,7 +71,7 @@ func SessionHeaderRequired(args ...interface{}) gin.HandlerFunc {
 
 func TokenHeaderRequired(args ...interface{}) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		excepts := []string{"/api/alpha/account/register", "/api/alpha/account/login"}
+		excepts := []string{"/api/alpha/account/register", "/api/alpha/auth/login"}
 
 		currentPath := c.Request.URL.Path
 
@@ -82,9 +82,9 @@ func TokenHeaderRequired(args ...interface{}) gin.HandlerFunc {
 			}
 		}
 
-		header := c.Request.Header.Get("Authorization")
+		authorization := c.Request.Header.Get("Authorization")
 
-		if header == "" {
+		if authorization == "" {
 			c.Header("Content-Type", "application/json")
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"code":   401,
@@ -95,7 +95,7 @@ func TokenHeaderRequired(args ...interface{}) gin.HandlerFunc {
 			return
 		}
 
-		tokens := strings.Split(header, " ")
+		tokens := strings.Split(authorization, " ")
 		if len(tokens) != 2 {
 			c.Header("Content-Type", "application/json")
 			c.JSON(http.StatusUnauthorized, gin.H{
@@ -107,10 +107,34 @@ func TokenHeaderRequired(args ...interface{}) gin.HandlerFunc {
 			return
 		}
 
-		tokenString := tokens[1]
-		userToken := &domain.UserToken{}
+		var claims jwt.Claims
+		if tokens[0] == "Bearer" {
+			claims = &domain.AccessTokenClaims{}
+		} else if tokens[0] == "Refresh" {
+			if currentPath != "/api/alpha/auth/refresh" {
+				c.Header("Content-Type", "application/json")
+				c.JSON(http.StatusUnauthorized, gin.H{
+					"code":   401,
+					"status": "Unauthorized",
+					"error":  "invalid refresh uri",
+				})
+				c.Abort()
+				return
+			}
+			claims = &domain.RefreshTokenClaims{}
+		} else {
+			c.Header("Content-Type", "application/json")
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"code":   401,
+				"status": "Unauthorized",
+				"error":  "invalid token indentifier",
+			})
+			c.Abort()
+			return
+		}
 
-		token, err := jwt.ParseWithClaims(tokenString, userToken, func(token *jwt.Token) (interface{}, error) {
+		tokenString := tokens[1]
+		token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
 			return []byte(os.Getenv("SECRET_KEY")), nil
 		})
 
@@ -119,7 +143,7 @@ func TokenHeaderRequired(args ...interface{}) gin.HandlerFunc {
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"code":   401,
 				"status": "Unauthorized",
-				"error":  "malformed authentication token",
+				"error":  err.Error(),
 			})
 			c.Abort()
 			return
@@ -136,8 +160,22 @@ func TokenHeaderRequired(args ...interface{}) gin.HandlerFunc {
 			return
 		}
 
-		fmt.Printf("User id %s", userToken.UserID)
-		c.Set("user_id", userToken.UserID)
+		if tokens[0] == "Bearer" {
+			c.Set("userid", claims.(*domain.AccessTokenClaims).Userid)
+		} else if tokens[0] == "Refresh" {
+			if claims.(*domain.RefreshTokenClaims).Sub != 1 {
+				c.Header("Content-Type", "application/json")
+				c.JSON(http.StatusUnauthorized, gin.H{
+					"code":   401,
+					"status": "Unauthorized",
+					"error":  "invalid refresh token",
+				})
+				c.Abort()
+				return
+			}
+			c.Set("userid", claims.(*domain.RefreshTokenClaims).Userid)
+			c.Set("sub", claims.(*domain.RefreshTokenClaims).Sub)
+		}
 		c.Next()
 	}
 }
