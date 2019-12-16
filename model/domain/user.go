@@ -75,6 +75,11 @@ func (Token) TableName() string {
 	return "tokens"
 }
 
+func (token *Token) BeforeCreate(scope *gorm.Scope) error {
+	scope.SetColumn("ID", uuid.New().String())
+	return nil
+}
+
 type Session struct {
 	model.BaseModel
 	UserID       string    `json:"user_id" bson:"user_id"`
