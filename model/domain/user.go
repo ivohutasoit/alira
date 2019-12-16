@@ -5,12 +5,14 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/google/uuid"
 	"github.com/ivohutasoit/alira/model"
+	"github.com/jinzhu/gorm"
 )
 
 func init() {
 	gob.Register(&User{})
-	gob.Register(&UserProfile{})
+	gob.Register(&Profile{})
 	gob.Register(&Token{})
 }
 
@@ -33,15 +35,21 @@ type User struct {
 	Email    string `json:"email" bson:"email"`
 	Mobile   string `json:"mobile" bson:"mobile"`
 	Avatar   string `json:"avatar" bson:"avatar"`
-	Active   bool   `json:"active" bson:"active"`
+	Active   bool   `json:"active" bson:"active" gorm:"default:false"`
 }
 
 func (User) TableName() string {
 	return "users"
 }
 
-type UserProfile struct {
+func (user *User) BeforeCreate(scope *gorm.Scope) error {
+	scope.SetColumn("ID", uuid.New().String())
+	return nil
+}
+
+type Profile struct {
 	model.BaseModel
+	User        User   `json:"-" gorm:"foreignkey:ID"`
 	Name        string `json:"name" bson:"name"`
 	FirstName   string `json:"first_name" bson:"first_name"`
 	LastName    string `json:"last_name" bson:"last_name"`
@@ -50,7 +58,7 @@ type UserProfile struct {
 	Description string `json:"description" bson:"description"`
 }
 
-func (UserProfile) TableName() string {
+func (Profile) TableName() string {
 	return "profiles"
 }
 
@@ -60,24 +68,30 @@ type Token struct {
 	Purpose   string    `json:"purpose" bson:"purpose"`
 	UserID    string    `json:"user_id" bson:"user_id"`
 	ExpiredAt time.Time `json:"expired_at" bson:"expired_at"`
-	Valid     bool      `json:"valid" bson:"valid"`
+	Valid     bool      `json:"valid" bson:"valid" gorm:"default:true"`
 }
 
 func (Token) TableName() string {
 	return "tokens"
 }
 
-type UserSubscribe struct {
+type Session struct {
 	model.BaseModel
-	Code      string    `json:"code" bson:"code"`
-	UserID    string    `json:"user_id" bson:"user_id"`
-	Purpose   string    `json:"purpose" bson:"purpose"`
-	Signature string    `json:"signature" bson:"signature"`
-	NotBefore time.Time `json:"not_before" bson:"not_before"`
-	NotAfter  time.Time `json:"not_after" bson:"not_after"`
-	AgreedAt  time.Time `json:"agreed_at" bson:"agreed_at"`
+	UserID       string    `json:"user_id" bson:"user_id"`
+	User         User      `json:"-" gorm:"foreignkey:UserID"`
+	Agent        string    `json:"agent" bson:"agent"`
+	AccessToken  string    `json:"access_token" bson:"access_token"`
+	RefreshToken string    `json:"refresh_token" bson:"refresh_token"`
+	IP           string    `json:"ip" bson:"ip"`
+	NotBefore    time.Time `json:"not_before" bson:"not_before"`
+	NotAfter     time.Time `json:"not_after" bson:"not_after"`
 }
 
-func (UserSubscribe) TableName() string {
-	return "subscribes"
+func (Session) TableName() string {
+	return "sessions"
+}
+
+func (session *Session) BeforeCreate(scope *gorm.Scope) error {
+	scope.SetColumn("ID", uuid.New().String())
+	return nil
 }
