@@ -9,6 +9,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"github.com/ivohutasoit/alira/model"
 	"github.com/ivohutasoit/alira/model/domain"
 	"github.com/ivohutasoit/alira/util"
 )
@@ -52,19 +53,42 @@ func SessionHeaderRequired(args ...interface{}) gin.HandlerFunc {
 			}
 		}
 
+		url, err := util.GenerateUrl(c.Request.TLS, c.Request.Host, c.Request.URL.Path, true)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+
 		session := sessions.Default(c)
-		token := session.Get("access_token")
-		if token == nil {
-			url, err := util.GenerateUrl(c.Request.TLS, c.Request.Host, c.Request.URL.Path, true)
-			if err != nil {
-				fmt.Println(err)
-				return
-			}
+		accessToken := session.Get("access_token")
+		if accessToken == nil {
 			redirect := fmt.Sprintf("%s?redirect=%s", args[0].(string), url)
 			c.Redirect(http.StatusMovedPermanently, redirect)
 			c.Abort()
 			return
 		}
+		claims := &domain.AccessTokenClaims{}
+		token, err := jwt.ParseWithClaims(accessToken.(string), claims, func(token *jwt.Token) (interface{}, error) {
+			return []byte(os.Getenv("SECRET_KEY")), nil
+		})
+		if err != nil || !token.Valid {
+			redirect := fmt.Sprintf("%s?redirect=%s", args[0].(string), url)
+			c.Redirect(http.StatusMovedPermanently, redirect)
+			c.Abort()
+			return
+		}
+
+		var user *domain.User
+		model.GetDatabase().First(&user, "user_id = ? AND active = ? AND deleted_at IS NULL",
+			claims.UserID, true)
+		if user == nil {
+			redirect := fmt.Sprintf("%s?redirect=%s", args[0].(string), url)
+			c.Redirect(http.StatusMovedPermanently, redirect)
+			c.Abort()
+			return
+		}
+		c.Set("userid", user.ID)
+
 		c.Next()
 	}
 }
@@ -160,8 +184,11 @@ func TokenHeaderRequired(args ...interface{}) gin.HandlerFunc {
 			return
 		}
 
+		var user *domain.User
+		var userID string
+		var sub int
 		if tokens[0] == "Bearer" {
-			c.Set("userid", claims.(*domain.AccessTokenClaims).Userid)
+			userID = claims.(*domain.AccessTokenClaims).UserID
 		} else if tokens[0] == "Refresh" {
 			if claims.(*domain.RefreshTokenClaims).Sub != 1 {
 				c.Header("Content-Type", "application/json")
@@ -173,9 +200,25 @@ func TokenHeaderRequired(args ...interface{}) gin.HandlerFunc {
 				c.Abort()
 				return
 			}
-			c.Set("userid", claims.(*domain.RefreshTokenClaims).Userid)
-			c.Set("sub", claims.(*domain.RefreshTokenClaims).Sub)
+			userID = claims.(*domain.RefreshTokenClaims).UserID
+			sub = claims.(*domain.RefreshTokenClaims).Sub
 		}
+
+		model.GetDatabase().First(&user, "user_id = ? AND active = ? AND deleted_at IS NULL",
+			userID, true)
+		if user == nil {
+			c.Header("Content-Type", "application/json")
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"code":   401,
+				"status": "Unauthorized",
+				"error":  "invalid token user",
+			})
+			c.Abort()
+			return
+		}
+		c.Set("userid", user.ID)
+		c.Set("sub", sub)
+
 		c.Next()
 	}
 }
