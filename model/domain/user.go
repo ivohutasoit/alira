@@ -18,13 +18,13 @@ func init() {
 
 type AccessTokenClaims struct {
 	jwt.StandardClaims
-	Userid string
+	UserID string
 	Admin  bool
 }
 
 type RefreshTokenClaims struct {
 	jwt.StandardClaims
-	Userid string
+	UserID string
 	Sub    int
 }
 
@@ -64,11 +64,17 @@ func (Profile) TableName() string {
 
 type Token struct {
 	model.BaseModel
-	Code      string    `json:"code" bson:"code"`
-	Purpose   string    `json:"purpose" bson:"purpose"`
-	UserID    string    `json:"user_id" bson:"user_id"`
-	ExpiredAt time.Time `json:"expired_at" bson:"expired_at"`
-	Valid     bool      `json:"valid" bson:"valid" gorm:"default:true"`
+	Class        string    `json:"-" bson:"-"`
+	Referer      string    `json:"referer" bson:"referer"`
+	UserID       string    `json:"user_id" bson:"user_id"`
+	User         User      `json:"-" gorm:"foreignkey:UserID"`
+	Agent        string    `json:"agent" bson:"agent"`
+	AccessToken  string    `json:"access_token bson:"access_token"`
+	RefreshToken string    `json:"refresh_token" bson:"refresh_token"`
+	IPAddress    string    `json:"ip_address" bson:"ip_address"`
+	NotBefore    time.Time `json:"not_before" bson:"not_before"`
+	NotAfter     time.Time `json:"not_after" bson:"not_after"`
+	Valid        bool      `json:"valid" bson:"valid" gorm:"default:true"`
 }
 
 func (Token) TableName() string {
@@ -76,27 +82,6 @@ func (Token) TableName() string {
 }
 
 func (token *Token) BeforeCreate(scope *gorm.Scope) error {
-	scope.SetColumn("ID", uuid.New().String())
-	return nil
-}
-
-type Session struct {
-	model.BaseModel
-	UserID       string    `json:"user_id" bson:"user_id"`
-	User         User      `json:"-" gorm:"foreignkey:UserID"`
-	Agent        string    `json:"agent" bson:"agent"`
-	AccessToken  string    `json:"access_token" bson:"access_token"`
-	RefreshToken string    `json:"refresh_token" bson:"refresh_token"`
-	IP           string    `json:"ip" bson:"ip"`
-	NotBefore    time.Time `json:"not_before" bson:"not_before"`
-	NotAfter     time.Time `json:"not_after" bson:"not_after"`
-}
-
-func (Session) TableName() string {
-	return "sessions"
-}
-
-func (session *Session) BeforeCreate(scope *gorm.Scope) error {
 	scope.SetColumn("ID", uuid.New().String())
 	return nil
 }
