@@ -43,7 +43,7 @@ func SessionHeaderRequired(args ...interface{}) gin.HandlerFunc {
 		panic("authentication uri must be provided")
 	}
 	return func(c *gin.Context) {
-		excepts := []string{"/auth/login"}
+		excepts := strings.Split(os.Getenv("EXCEPT_WEB"), ";")
 
 		currentPath := c.Request.URL.Path
 		for _, value := range excepts {
@@ -95,7 +95,7 @@ func SessionHeaderRequired(args ...interface{}) gin.HandlerFunc {
 
 func TokenHeaderRequired(args ...interface{}) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		excepts := []string{"/api/alpha/account/register", "/api/alpha/auth/login"}
+		excepts := strings.Split(os.Getenv("EXCEPT_API"), ";")
 
 		currentPath := c.Request.URL.Path
 
