@@ -5,6 +5,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"github.com/joho/godotenv"
@@ -17,6 +18,11 @@ type BaseModel struct {
 	CreatedAt time.Time  `json:"-"`
 	UpdatedAt time.Time  `json:"-"`
 	DeletedAt *time.Time `sql:"index" json:"-"`
+}
+
+func (base *BaseModel) BeforeCreate(scope *gorm.Scope) error {
+	scope.SetColumn("ID", uuid.New().String())
+	return nil
 }
 
 func init() {

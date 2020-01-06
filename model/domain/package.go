@@ -3,9 +3,7 @@ package domain
 import (
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/ivohutasoit/alira/model"
-	"github.com/jinzhu/gorm"
 )
 
 type Subscribe struct {
@@ -22,9 +20,4 @@ type Subscribe struct {
 
 func (Subscribe) TableName() string {
 	return "subscribes"
-}
-
-func (subscribe *Subscribe) BeforeCreate(scope *gorm.Scope) error {
-	scope.SetColumn("ID", uuid.New().String())
-	return nil
 }

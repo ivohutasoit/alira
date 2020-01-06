@@ -5,9 +5,7 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
-	"github.com/google/uuid"
 	"github.com/ivohutasoit/alira/model"
-	"github.com/jinzhu/gorm"
 )
 
 func init() {
@@ -42,11 +40,6 @@ func (User) TableName() string {
 	return "users"
 }
 
-func (user *User) BeforeCreate(scope *gorm.Scope) error {
-	scope.SetColumn("ID", uuid.New().String())
-	return nil
-}
-
 type Profile struct {
 	model.BaseModel
 	User        User   `json:"-" gorm:"foreignkey:ID"`
@@ -79,9 +72,4 @@ type Token struct {
 
 func (Token) TableName() string {
 	return "tokens"
-}
-
-func (token *Token) BeforeCreate(scope *gorm.Scope) error {
-	scope.SetColumn("ID", uuid.New().String())
-	return nil
 }
