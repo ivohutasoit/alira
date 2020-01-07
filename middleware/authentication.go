@@ -44,12 +44,21 @@ func SessionHeaderRequired(args ...interface{}) gin.HandlerFunc {
 	}
 	return func(c *gin.Context) {
 		excepts := strings.Split(os.Getenv("EXCEPT_WEB"), ";")
+		optionals := strings.Split(os.Getenv("OPTIONAL_WEB"), ";")
 
 		currentPath := c.Request.URL.Path
 		for _, value := range excepts {
 			if strings.TrimSpace(value) == currentPath {
 				c.Next()
 				return
+			}
+		}
+
+		optional := false
+		for _, value := range optionals {
+			if strings.TrimSpace(value) == currentPath {
+				optional = true
+				break
 			}
 		}
 
@@ -81,7 +90,7 @@ func SessionHeaderRequired(args ...interface{}) gin.HandlerFunc {
 		var user *domain.User
 		model.GetDatabase().First(&user, "user_id = ? AND active = ? AND deleted_at IS NULL",
 			claims.UserID, true)
-		if user == nil {
+		if user == nil && !optional {
 			redirect := fmt.Sprintf("%s?redirect=%s", args[0].(string), url)
 			c.Redirect(http.StatusMovedPermanently, redirect)
 			c.Abort()
