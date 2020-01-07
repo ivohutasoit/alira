@@ -48,7 +48,7 @@ func SessionHeaderRequired(args ...interface{}) gin.HandlerFunc {
 
 		currentPath := c.Request.URL.Path
 		for _, value := range excepts {
-			if strings.TrimSpace(value) == currentPath {
+			if strings.Contains(currentPath, strings.TrimSpace(value)) {
 				c.Next()
 				return
 			}
@@ -56,7 +56,7 @@ func SessionHeaderRequired(args ...interface{}) gin.HandlerFunc {
 
 		optional := false
 		for _, value := range optionals {
-			if strings.TrimSpace(value) == currentPath {
+			if strings.Contains(currentPath, strings.TrimSpace(value)) {
 				optional = true
 				break
 			}
@@ -109,7 +109,7 @@ func TokenHeaderRequired(args ...interface{}) gin.HandlerFunc {
 		currentPath := c.Request.URL.Path
 
 		for _, value := range excepts {
-			if strings.TrimSpace(value) == currentPath {
+			if strings.Contains(currentPath, strings.TrimSpace(value)) {
 				c.Next()
 				return
 			}
