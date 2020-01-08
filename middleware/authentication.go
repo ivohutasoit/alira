@@ -46,7 +46,7 @@ func SessionHeaderRequired(args ...interface{}) gin.HandlerFunc {
 
 		session := sessions.Default(c)
 		accessToken := session.Get("access_token")
-		if accessToken == nil {
+		if accessToken == nil && !optional {
 			redirect := fmt.Sprintf("%s?redirect=%s", args[0].(string), url)
 			c.Redirect(http.StatusMovedPermanently, redirect)
 			c.Abort()
