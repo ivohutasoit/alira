@@ -10,19 +10,19 @@ import (
 
 func init() {
 	gob.Register(&User{})
-	gob.Register(&UserProfile{})
+	gob.Register(&Profile{})
 	gob.Register(&Token{})
 }
 
 type AccessTokenClaims struct {
 	jwt.StandardClaims
-	Userid string
+	UserID string
 	Admin  bool
 }
 
 type RefreshTokenClaims struct {
 	jwt.StandardClaims
-	Userid string
+	UserID string
 	Sub    int
 }
 
@@ -33,33 +33,41 @@ type User struct {
 	Email    string `json:"email" bson:"email"`
 	Mobile   string `json:"mobile" bson:"mobile"`
 	Avatar   string `json:"avatar" bson:"avatar"`
-	Active   bool   `json:"active" bson:"active"`
+	Active   bool   `json:"active" bson:"active" gorm:"default:false"`
 }
 
 func (User) TableName() string {
 	return "users"
 }
 
-type UserProfile struct {
+type Profile struct {
 	model.BaseModel
+	User        User   `json:"-" gorm:"foreignkey:ID"`
 	Name        string `json:"name" bson:"name"`
 	FirstName   string `json:"first_name" bson:"first_name"`
 	LastName    string `json:"last_name" bson:"last_name"`
 	NickName    string `json:"nick_name" bson:"nick_name"`
+	Gender      string `json:"gender" bson:"gender"`
 	Description string `json:"description" bson:"description"`
 }
 
-func (UserProfile) TableName() string {
+func (Profile) TableName() string {
 	return "profiles"
 }
 
 type Token struct {
 	model.BaseModel
-	Code      string    `json:"code" bson:"code"`
-	Purpose   string    `json:"purpose" bson:"purpose"`
-	UserID    string    `json:"user_id" bson:"user_id"`
-	ExpiredAt time.Time `json:"expired_at" bson:"expired_at"`
-	Valid     bool      `json:"valid" bson:"valid"`
+	Class        string    `json:"-" bson:"-"`
+	Referer      string    `json:"referer" bson:"referer"`
+	UserID       string    `json:"user_id" bson:"user_id"`
+	User         User      `json:"-" gorm:"foreignkey:UserID"`
+	Agent        string    `json:"agent" bson:"agent"`
+	AccessToken  string    `json:"access_token bson:"access_token"`
+	RefreshToken string    `json:"refresh_token" bson:"refresh_token"`
+	IPAddress    string    `json:"ip_address" bson:"ip_address"`
+	NotBefore    time.Time `json:"not_before" bson:"not_before"`
+	NotAfter     time.Time `json:"not_after" bson:"not_after"`
+	Valid        bool      `json:"valid" bson:"valid" gorm:"default:true"`
 }
 
 func (Token) TableName() string {

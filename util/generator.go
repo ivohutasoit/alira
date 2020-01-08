@@ -4,7 +4,7 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/ivohutasoit/alira/common"
+	"github.com/ivohutasoit/alira/constant"
 )
 
 func GenerateToken(length int) string {
@@ -14,7 +14,7 @@ func GenerateToken(length int) string {
 	b := make([]byte, length)
 	rand.Seed(time.Now().UnixNano())
 	for i := range b {
-		b[i] = common.Numbers[rand.Intn(len(common.Numbers))]
+		b[i] = constant.Numbers[rand.Intn(len(constant.Numbers))]
 	}
 	return string(b)
 }
@@ -26,7 +26,7 @@ func GenerateQrcode(length int) string {
 	b := make([]byte, length)
 	rand.Seed(time.Now().UnixNano())
 	for i := range b {
-		b[i] = common.Letters[rand.Intn(len(common.Letters))]
+		b[i] = constant.Letters[rand.Intn(len(constant.Letters))]
 	}
 	return string(b)
 }

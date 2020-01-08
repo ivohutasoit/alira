@@ -1,3 +1,5 @@
+.env
+*.db
 go.sum
 account
 chatting
