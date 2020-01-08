@@ -14,30 +14,6 @@ import (
 	"github.com/ivohutasoit/alira/util"
 )
 
-func AuthenticationRequired(args ...interface{}) gin.HandlerFunc {
-	if 1 > len(args) {
-		panic("Redirect authentication url must be provided")
-	}
-
-	return func(c *gin.Context) {
-		session := sessions.Default(c)
-		token := session.Get("token")
-		if token == nil {
-			url := fmt.Sprintf("%s%s", c.Request.Host, c.Request.RequestURI)
-			fmt.Println(strings.TrimSpace(url))
-			url, err := util.Encrypt(strings.TrimSpace(url), os.Getenv("SECRET_KEY"))
-			if err != nil {
-				fmt.Println(err)
-			}
-			redirect := fmt.Sprintf("%s%s", args[0].(string), url)
-			c.Redirect(http.StatusMovedPermanently, redirect)
-			c.Abort()
-			return
-		}
-		c.Next()
-	}
-}
-
 func SessionHeaderRequired(args ...interface{}) gin.HandlerFunc {
 	if 1 > len(args) {
 		panic("authentication uri must be provided")
@@ -87,9 +63,21 @@ func SessionHeaderRequired(args ...interface{}) gin.HandlerFunc {
 			return
 		}
 
+		var sessionToken *domain.Token
+		model.GetDatabase().First(&sessionToken, "access_token = ? AND valid = ?",
+			accessToken, true)
+
+		if sessionToken == nil && !optional {
+			redirect := fmt.Sprintf("%s?redirect=%s", args[0].(string), url)
+			c.Redirect(http.StatusMovedPermanently, redirect)
+			c.Abort()
+			return
+		}
+
 		var user *domain.User
 		model.GetDatabase().First(&user, "user_id = ? AND active = ? AND deleted_at IS NULL",
-			claims.UserID, true)
+			sessionToken.UserID, true)
+
 		if user == nil && !optional {
 			redirect := fmt.Sprintf("%s?redirect=%s", args[0].(string), url)
 			c.Redirect(http.StatusMovedPermanently, redirect)
@@ -197,7 +185,21 @@ func TokenHeaderRequired(args ...interface{}) gin.HandlerFunc {
 		var userID string
 		var sub int
 		if tokens[0] == "Bearer" {
-			userID = claims.(*domain.AccessTokenClaims).UserID
+			var sessionToken *domain.Token
+			model.GetDatabase().First(&sessionToken, "access_token = ? AND valid = ?",
+				tokenString, true)
+
+			if sessionToken == nil {
+				c.Header("Content-Type", "application/json")
+				c.JSON(http.StatusUnauthorized, gin.H{
+					"code":   401,
+					"status": "Unauthorized",
+					"error":  "invalid token",
+				})
+				c.Abort()
+				return
+			}
+			userID = sessionToken.UserID
 		} else if tokens[0] == "Refresh" {
 			if claims.(*domain.RefreshTokenClaims).Sub != 1 {
 				c.Header("Content-Type", "application/json")
@@ -209,7 +211,21 @@ func TokenHeaderRequired(args ...interface{}) gin.HandlerFunc {
 				c.Abort()
 				return
 			}
-			userID = claims.(*domain.RefreshTokenClaims).UserID
+			var sessionToken *domain.Token
+			model.GetDatabase().First(&sessionToken, "refresh_token = ? AND valid = ?",
+				tokenString, true)
+
+			if sessionToken == nil {
+				c.Header("Content-Type", "application/json")
+				c.JSON(http.StatusUnauthorized, gin.H{
+					"code":   401,
+					"status": "Unauthorized",
+					"error":  "invalid refresh token",
+				})
+				c.Abort()
+				return
+			}
+			userID = sessionToken.UserID
 			sub = claims.(*domain.RefreshTokenClaims).Sub
 		}
 
@@ -220,7 +236,7 @@ func TokenHeaderRequired(args ...interface{}) gin.HandlerFunc {
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"code":   401,
 				"status": "Unauthorized",
-				"error":  "invalid token user",
+				"error":  "invalid user",
 			})
 			c.Abort()
 			return
