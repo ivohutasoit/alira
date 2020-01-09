@@ -32,7 +32,10 @@ func SessionHeaderRequired(args ...interface{}) gin.HandlerFunc {
 
 		optional := false
 		for _, value := range optionals {
-			if strings.Contains(currentPath, strings.TrimSpace(value)) {
+			if value == "/" && currentPath == "" {
+				optional = true
+				break
+			} else if currentPath == strings.TrimSpace(value) {
 				optional = true
 				break
 			}
@@ -52,39 +55,41 @@ func SessionHeaderRequired(args ...interface{}) gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		claims := &domain.AccessTokenClaims{}
-		token, err := jwt.ParseWithClaims(accessToken.(string), claims, func(token *jwt.Token) (interface{}, error) {
-			return []byte(os.Getenv("SECRET_KEY")), nil
-		})
-		if err != nil || !token.Valid {
-			redirect := fmt.Sprintf("%s?redirect=%s", args[0].(string), url)
-			c.Redirect(http.StatusMovedPermanently, redirect)
-			c.Abort()
-			return
+		if accessToken != nil {
+			claims := &domain.AccessTokenClaims{}
+			token, err := jwt.ParseWithClaims(accessToken.(string), claims, func(token *jwt.Token) (interface{}, error) {
+				return []byte(os.Getenv("SECRET_KEY")), nil
+			})
+			if err != nil || !token.Valid {
+				redirect := fmt.Sprintf("%s?redirect=%s", args[0].(string), url)
+				c.Redirect(http.StatusMovedPermanently, redirect)
+				c.Abort()
+				return
+			}
+
+			sessionToken := &domain.Token{}
+			model.GetDatabase().First(sessionToken, "access_token = ? AND valid = ?",
+				strings.TrimSpace(accessToken.(string)), true)
+
+			if sessionToken == nil && !optional {
+				redirect := fmt.Sprintf("%s?redirect=%s", args[0].(string), url)
+				c.Redirect(http.StatusMovedPermanently, redirect)
+				c.Abort()
+				return
+			}
+			fmt.Println(sessionToken)
+			user := &domain.User{}
+			model.GetDatabase().First(user, "id = ? AND active = ? AND deleted_at IS NULL",
+				sessionToken.UserID, true)
+
+			if user == nil && !optional {
+				redirect := fmt.Sprintf("%s?redirect=%s", args[0].(string), url)
+				c.Redirect(http.StatusMovedPermanently, redirect)
+				c.Abort()
+				return
+			}
+			c.Set("userid", user.ID)
 		}
-
-		var sessionToken *domain.Token
-		model.GetDatabase().First(&sessionToken, "access_token = ? AND valid = ?",
-			accessToken, true)
-
-		if sessionToken == nil && !optional {
-			redirect := fmt.Sprintf("%s?redirect=%s", args[0].(string), url)
-			c.Redirect(http.StatusMovedPermanently, redirect)
-			c.Abort()
-			return
-		}
-
-		var user *domain.User
-		model.GetDatabase().First(&user, "user_id = ? AND active = ? AND deleted_at IS NULL",
-			sessionToken.UserID, true)
-
-		if user == nil && !optional {
-			redirect := fmt.Sprintf("%s?redirect=%s", args[0].(string), url)
-			c.Redirect(http.StatusMovedPermanently, redirect)
-			c.Abort()
-			return
-		}
-		c.Set("userid", user.ID)
 
 		c.Next()
 	}
@@ -181,12 +186,12 @@ func TokenHeaderRequired(args ...interface{}) gin.HandlerFunc {
 			return
 		}
 
-		var user *domain.User
+		user := &domain.User{}
+		sessionToken := &domain.Token{}
 		var userID string
 		var sub int
 		if tokens[0] == "Bearer" {
-			var sessionToken *domain.Token
-			model.GetDatabase().First(&sessionToken, "access_token = ? AND valid = ?",
+			model.GetDatabase().First(sessionToken, "access_token = ? AND valid = ?",
 				tokenString, true)
 
 			if sessionToken == nil {
@@ -211,7 +216,6 @@ func TokenHeaderRequired(args ...interface{}) gin.HandlerFunc {
 				c.Abort()
 				return
 			}
-			var sessionToken *domain.Token
 			model.GetDatabase().First(&sessionToken, "refresh_token = ? AND valid = ?",
 				tokenString, true)
 
@@ -229,7 +233,7 @@ func TokenHeaderRequired(args ...interface{}) gin.HandlerFunc {
 			sub = claims.(*domain.RefreshTokenClaims).Sub
 		}
 
-		model.GetDatabase().First(&user, "user_id = ? AND active = ? AND deleted_at IS NULL",
+		model.GetDatabase().First(user, "user_id = ? AND active = ? AND deleted_at IS NULL",
 			userID, true)
 		if user == nil {
 			c.Header("Content-Type", "application/json")
