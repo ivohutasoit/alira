@@ -36,6 +36,8 @@ type CommunityUser struct {
 	Community    Community
 	UserID       string
 	User         User
+	Creator      bool
+	Admin        bool
 	AdditionInfo string
 }
 
