@@ -41,14 +41,17 @@ func (User) TableName() string {
 }
 
 type Profile struct {
-	model.BaseModel
-	User        User   `json:"-" gorm:"foreignkey:ID"`
-	Name        string `json:"name" bson:"name"`
-	FirstName   string `json:"first_name" bson:"first_name"`
-	LastName    string `json:"last_name" bson:"last_name"`
-	NickName    string `json:"nick_name" bson:"nick_name"`
-	Gender      string `json:"gender" bson:"gender"`
-	Description string `json:"description" bson:"description"`
+	ID          string     `gorm:"primary_key" json:"id" bson:"id"`
+	CreatedAt   time.Time  `json:"-"`
+	UpdatedAt   time.Time  `json:"-"`
+	DeletedAt   *time.Time `sql:"index" json:"-"`
+	User        User       `json:"-" gorm:"foreignkey:ID"`
+	Name        string     `json:"name" bson:"name"`
+	FirstName   string     `json:"first_name" bson:"first_name"`
+	LastName    string     `json:"last_name" bson:"last_name"`
+	NickName    string     `json:"nick_name" bson:"nick_name"`
+	Gender      string     `json:"gender" bson:"gender"`
+	Description string     `json:"description" bson:"description"`
 }
 
 func (Profile) TableName() string {
