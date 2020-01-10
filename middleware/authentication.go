@@ -77,7 +77,6 @@ func SessionHeaderRequired(args ...interface{}) gin.HandlerFunc {
 				c.Abort()
 				return
 			}
-			fmt.Println(sessionToken)
 			user := &domain.User{}
 			model.GetDatabase().First(user, "id = ? AND active = ? AND deleted_at IS NULL",
 				sessionToken.UserID, true)
