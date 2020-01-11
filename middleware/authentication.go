@@ -19,8 +19,8 @@ func SessionHeaderRequired(args ...interface{}) gin.HandlerFunc {
 		panic("authentication uri must be provided")
 	}
 	return func(c *gin.Context) {
-		excepts := strings.Split(os.Getenv("EXCEPT_WEB"), ";")
-		optionals := strings.Split(os.Getenv("OPTIONAL_WEB"), ";")
+		excepts := strings.Split(os.Getenv("URL.WEB.EXCEPT"), ";")
+		optionals := strings.Split(os.Getenv("URL.WEB.OPTIONAL"), ";")
 
 		currentPath := c.Request.URL.Path
 		for _, value := range excepts {
@@ -58,7 +58,7 @@ func SessionHeaderRequired(args ...interface{}) gin.HandlerFunc {
 		if accessToken != nil {
 			claims := &domain.AccessTokenClaims{}
 			token, err := jwt.ParseWithClaims(accessToken.(string), claims, func(token *jwt.Token) (interface{}, error) {
-				return []byte(os.Getenv("SECRET_KEY")), nil
+				return []byte(os.Getenv("APP.SECRET.KEY")), nil
 			})
 			if err != nil || !token.Valid {
 				redirect := fmt.Sprintf("%s?redirect=%s", args[0].(string), url)
@@ -96,7 +96,7 @@ func SessionHeaderRequired(args ...interface{}) gin.HandlerFunc {
 
 func TokenHeaderRequired(args ...interface{}) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		excepts := strings.Split(os.Getenv("EXCEPT_API"), ";")
+		excepts := strings.Split(os.Getenv("URL.API.EXCEPT"), ";")
 
 		currentPath := c.Request.URL.Path
 
@@ -160,7 +160,7 @@ func TokenHeaderRequired(args ...interface{}) gin.HandlerFunc {
 
 		tokenString := tokens[1]
 		token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
-			return []byte(os.Getenv("SECRET_KEY")), nil
+			return []byte(os.Getenv("APP.SECRET.KEY")), nil
 		})
 
 		if err != nil {

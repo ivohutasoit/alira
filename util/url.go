@@ -51,7 +51,7 @@ func GenerateUrl(args ...interface{}) (string, error) {
 	}
 	url := fmt.Sprintf("%s%s%s", protocol, host, uri)
 	if encrypted == true {
-		url, err = Encrypt(strings.TrimSpace(url), os.Getenv("SECRET_KEY"))
+		url, err = Encrypt(strings.TrimSpace(url), os.Getenv("APP.SECRET.KEY"))
 		if err != nil {
 			fmt.Println(err)
 			return "", errors.New("could not encrypt")
