@@ -33,7 +33,7 @@ func SessionHeaderRequired(args ...interface{}) gin.HandlerFunc {
 
 		optional := false
 		for _, value := range optionals {
-			if value == "/" && currentPath == "" {
+			if value == "/" && (currentPath == "" || currentPath == "/") {
 				optional = true
 				break
 			} else if currentPath == strings.TrimSpace(value) {
