@@ -69,7 +69,7 @@ type Token struct {
 	RefreshToken string    `json:"refresh_token" bson:"refresh_token"`
 	IPAddress    string    `json:"ip_address" bson:"ip_address"`
 	NotBefore    time.Time `json:"not_before" bson:"not_before"`
-	NotAfter     time.Time `json:"not_after" bson:"not_after"`
+	NotAfter     time.Time `json:"not_after" bson:"not_after" gorm:"default:null"`
 	Valid        bool      `json:"valid" bson:"valid" gorm:"default:true"`
 }
 
