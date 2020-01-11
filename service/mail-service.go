@@ -12,7 +12,7 @@ import (
 type MailService struct{}
 
 func (ms *MailService) Send(mail *domain.Mail) (map[interface{}]interface{}, error) {
-	main.From = os.Getenv("SMTP_SENDER")
+	mail.From = os.Getenv("SMTP_SENDER")
 	var message string
 	for _, to := range mail.To {
 		body, _ := util.ParseMailTemplate(mail.Template, mail.Data)
