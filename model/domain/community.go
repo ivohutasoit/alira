@@ -1,46 +1,53 @@
 package domain
 
 import (
-	"github.com/ivohutasoit/alira/model"
+	"encoding/gob"
 	"time"
+
+	"github.com/ivohutasoit/alira/model"
 )
+
+func init() {
+	gob.Register(&Community{})
+	gob.Register(&CommunityMember{})
+}
 
 type Community struct {
 	model.BaseModel
-	Name        string
-	Category    string
-	Description string
-	BirthDate   time.Time
-	Interest    string
-	Street      string
-	City        string
-	Country     string
-	PostalCode  string
-	Telephone   string
-	Mobile      string
-	Website     string
-	Geocode     string
-	Longitude   float64
-	Latitude    float64
-	Finance     bool
-	Active      bool
+	Name        string `json:"name" bson:"name"`
+	Category    string `json:"category" bson:"category"`
+	Description string `json:"description" bson:"description"`
+	BirthDate   time.Time `json:"birth_date" bson:"birth_date"`
+	Interest    string `json:"interest" bson:"interest"`
+	Street      string `json:"street" bson:"street"` 
+	City        string `json:"city" bson:"city"`
+	Country     string `json:"country" bson:"country"`
+	PostalCode  string `json:"postal_code" bson:"postal_code"`
+	Telephone   string `json:"telephone" bson:"telephone"`
+	Mobile      string `json:"mobile" bson:"mobile"`
+	Website     string `json:"website" bson:"website"`
+	Geocode     string `json:"geocode" bson:"geocode"`
+	Longitude   float64 `json:"longitude" bson:"longitude"`
+	Latitude    float64 `json:"latitude" bson:"latitude"`
+	Finance     bool `json:"finance" bson:"finance"`
+	Active      bool `json:"active" bson:"active"`
 }
 
 func (Community) TableName() string {
 	return "communities"
 }
 
-type CommunityUser struct {
+type CommunityMember struct {
 	model.BaseModel
-	CommunityID  string
-	Community    Community
-	UserID       string
-	User         User
-	Creator      bool
-	Admin        bool
-	AdditionInfo string
+	CommunityID  string    `json:"community_id" bson:"community_id"`
+	Community    Community `json:"-" gorm:"foreignkey:CommunityID"`
+	UserID       string    `json:"user_id" bson:"user_id"`
+	User         User      `json:"-" gorm:"foreignkey:UserID"`
+	Creator      bool      `json:"creator" bson:"creator"`
+	Admin        bool      `json:"admin" bson:"admin"`
+	AdditionInfo string    `json:"additional_info" bson:"additional_info"`
 }
 
-func (CommunityUser) TableName() string {
-	return "community_users"
+func (CommunityMember) TableName() string {
+	return "community_members"
 }

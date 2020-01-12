@@ -65,7 +65,7 @@ type Token struct {
 	UserID       string    `json:"user_id" bson:"user_id"`
 	User         User      `json:"-" gorm:"foreignkey:UserID"`
 	Agent        string    `json:"agent" bson:"agent"`
-	AccessToken  string    `json:"access_token bson:"access_token"`
+	AccessToken  string    `json:"access_token" bson:"access_token"`
 	RefreshToken string    `json:"refresh_token" bson:"refresh_token"`
 	IPAddress    string    `json:"ip_address" bson:"ip_address"`
 	NotBefore    time.Time `json:"not_before" bson:"not_before"`
