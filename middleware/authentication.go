@@ -193,7 +193,6 @@ func TokenHeaderRequired(args ...interface{}) gin.HandlerFunc {
 		if tokens[0] == "Bearer" {
 			model.GetDatabase().First(sessionToken, "access_token = ? AND valid = ?",
 				tokenString, true)
-
 			if sessionToken == nil {
 				c.Header("Content-Type", "application/json")
 				c.JSON(http.StatusUnauthorized, gin.H{
@@ -233,7 +232,7 @@ func TokenHeaderRequired(args ...interface{}) gin.HandlerFunc {
 			sub = claims.(*domain.RefreshTokenClaims).Sub
 		}
 
-		model.GetDatabase().First(user, "user_id = ? AND active = ? AND deleted_at IS NULL",
+		model.GetDatabase().First(user, "id = ? AND active = ? AND deleted_at IS NULL",
 			userID, true)
 		if user == nil {
 			c.Header("Content-Type", "application/json")
