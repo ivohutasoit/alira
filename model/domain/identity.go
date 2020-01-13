@@ -40,6 +40,8 @@ type NationalIdentity struct {
 	Identity      Identity `json:"-" bson:"-"`
 	UserID        string   `json:"user_id" bson:"user_id"`
 	User          User     `json:"-" gorm:"foreignkey:UserID"`
+	Class     string    `json:"-" bson:"-"`
+	Type 		  string   `json:"type" bson:"type"`
 	NationID      string   `json:"nation_id" bson:"nation_id"`
 	Fullname      string   `json:"fullname" bson:"fullname"`
 	Address       string   `json:"address" bson:"address" gorm:"default:null"`
@@ -51,6 +53,11 @@ type NationalIdentity struct {
 	BloodType     string   `json:"blood_type" bson:"blood_type" gorm:"default:null"`
 	Religion      string   `json:"religion" bson:"religion" gorm:"default:null"`
 	MarriedStatus string   `json:"married_status" bson:"married_status" gorm:"default:null"`
+	IssueDate time.Time
+	ExpiryDate time.Time
+	RegistrationNo string
+	IssuedOffice string
+	Nikim string
 }
 
 func (NationalIdentity) TableName() string {
