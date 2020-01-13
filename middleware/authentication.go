@@ -23,7 +23,6 @@ func SessionHeaderRequired(args ...interface{}) gin.HandlerFunc {
 		optionals := strings.Split(os.Getenv("WEB_OPTIONAL"), ";")
 
 		currentPath := c.Request.URL.Path
-		fmt.Println(currentPath)
 		for _, value := range excepts {
 			if strings.Contains(currentPath, strings.TrimSpace(value)) {
 				c.Next()
