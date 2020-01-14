@@ -36,28 +36,29 @@ func (Identity) TableName() string {
 
 type NationalIdentity struct {
 	model.BaseModel
-	IdentityID    string   `json:"identity_id" bson:"identity_id"`
-	Identity      Identity `json:"-" bson:"-"`
-	UserID        string   `json:"user_id" bson:"user_id"`
-	User          User     `json:"-" gorm:"foreignkey:UserID"`
-	Class     string    `json:"-" bson:"-"`
-	Type 		  string   `json:"type" bson:"type"`
-	NationID      string   `json:"nation_id" bson:"nation_id"`
-	Fullname      string   `json:"fullname" bson:"fullname"`
-	Address       string   `json:"address" bson:"address" gorm:"default:null"`
-	City          string   `json:"city" bson:"city" gorm:"default:null"`
-	State         string   `json:"state" bson:"state" gorm:"default:null"`
-	Province      string   `json:"province" bson:"province" gorm:"default:null"`
-	Country       string   `json:"country" bson:"country" gorm:"default:null"`
-	PostalCode    string   `json:"postal_code" bson:"postal_code" gorm:"default:null"`
-	BloodType     string   `json:"blood_type" bson:"blood_type" gorm:"default:null"`
-	Religion      string   `json:"religion" bson:"religion" gorm:"default:null"`
-	MarriedStatus string   `json:"married_status" bson:"married_status" gorm:"default:null"`
-	IssueDate time.Time
-	ExpiryDate time.Time
-	RegistrationNo string
-	IssuedOffice string
-	Nikim string
+	IdentityID     string    `json:"identity_id" bson:"identity_id"`
+	Identity       Identity  `json:"-" bson:"-"`
+	UserID         string    `json:"user_id" bson:"user_id"`
+	User           User      `json:"-" gorm:"foreignkey:UserID"`
+	Document       string    `json:"document" bson:"document"`
+	NationID       string    `json:"nation_id" bson:"nation_id"`
+	Fullname       string    `json:"fullname" bson:"fullname"`
+	Address        string    `json:"address" bson:"address" gorm:"default:null"`
+	City           string    `json:"city" bson:"city" gorm:"default:null"`
+	State          string    `json:"state" bson:"state" gorm:"default:null"`
+	Province       string    `json:"province" bson:"province" gorm:"default:null"`
+	Country        string    `json:"country" bson:"country" gorm:"default:null"`
+	PostalCode     string    `json:"postal_code" bson:"postal_code" gorm:"default:null"`
+	BloodType      string    `json:"blood_type" bson:"blood_type" gorm:"default:null"`
+	Religion       string    `json:"religion" bson:"religion" gorm:"default:null"`
+	MarriedStatus  string    `json:"married_status" bson:"married_status" gorm:"default:null"`
+	Type           string    `json:"type" bson:"type"`
+	Nationality    string    `json:"nationality" bson:"nationality" gorm:"default:null"`
+	IssueDate      time.Time `json:"issued_date" bson:"issued_date" gorm:"default:null"`
+	ExpiryDate     time.Time `json:"expiry_date" bson:"expiry_date" gorm:"default:null"`
+	RegistrationNo string    `json:"reg_no" bson:"reg_no" gorm:"default:null"`
+	IssuedOffice   string    `json:"issued_office" bson:"issued_office" gorm:"default:null"`
+	Nikim          string    `json:"nikim" bson:"nikim" gorm:"default:null"`
 }
 
 func (NationalIdentity) TableName() string {

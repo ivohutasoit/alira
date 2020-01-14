@@ -30,3 +30,7 @@ func GenerateQrcode(length int) string {
 	}
 	return string(b)
 }
+
+func GenerateNationID(args ...interface) string {
+	return "NATIONCODE"
+}
