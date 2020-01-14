@@ -43,6 +43,8 @@ type NationalIdentity struct {
 	Document       string    `json:"document" bson:"document"`
 	NationID       string    `json:"nation_id" bson:"nation_id"`
 	Fullname       string    `json:"fullname" bson:"fullname"`
+	BirthPlace     string    `json:"birth_place" bson:"birth_place"`
+	BirthDate      time.Time `json:"birth_date" bson:"birth_date" gorm:"default:null"`
 	Address        string    `json:"address" bson:"address" gorm:"default:null"`
 	City           string    `json:"city" bson:"city" gorm:"default:null"`
 	State          string    `json:"state" bson:"state" gorm:"default:null"`
