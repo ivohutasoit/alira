@@ -5,7 +5,9 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/google/uuid"
 	"github.com/ivohutasoit/alira/model"
+	"github.com/jinzhu/gorm"
 )
 
 func init() {
@@ -71,6 +73,12 @@ type Token struct {
 	NotBefore    time.Time `json:"not_before" bson:"not_before"`
 	NotAfter     time.Time `json:"not_after" bson:"not_after" gorm:"default:null"`
 	Valid        bool      `json:"valid" bson:"valid" gorm:"default:true"`
+}
+
+func (token *Token) BeforeCreate(scope *gorm.Scope) error {
+	scope.SetColumn("ID", uuid.New().String())
+	scope.SetColumn("NotBefore", time.Now())
+	return nil
 }
 
 func (Token) TableName() string {

@@ -4,6 +4,7 @@ import (
 	"encoding/gob"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/ivohutasoit/alira/model"
 	"github.com/jinzhu/gorm"
 )
@@ -26,6 +27,7 @@ type Identity struct {
 }
 
 func (identity *Identity) BeforeCreate(scope *gorm.Scope) error {
+	scope.SetColumn("ID", uuid.New().String())
 	scope.SetColumn("NotBefore", time.Now())
 	return nil
 }

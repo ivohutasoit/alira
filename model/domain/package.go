@@ -3,7 +3,9 @@ package domain
 import (
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/ivohutasoit/alira/model"
+	"github.com/jinzhu/gorm"
 )
 
 type Subscribe struct {
@@ -16,6 +18,12 @@ type Subscribe struct {
 	NotBefore time.Time `json:"not_before" bson:"not_before"`
 	NotAfter  time.Time `json:"not_after" bson:"not_after"`
 	AgreedAt  time.Time `json:"agreed_at" bson:"agreed_at"`
+}
+
+func (subscribe *Subscribe) BeforeCreate(scope *gorm.Scope) error {
+	scope.SetColumn("ID", uuid.New().String())
+	scope.SetColumn("NotBefore", time.Now())
+	return nil
 }
 
 func (Subscribe) TableName() string {
