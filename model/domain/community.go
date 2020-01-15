@@ -14,25 +14,28 @@ func init() {
 
 type Community struct {
 	model.BaseModel
-	Code        string    `json:"code" bson:"code"`
-	Name        string    `json:"name" bson:"name"`
-	Category    string    `json:"category" bson:"category"`
-	Description string    `json:"description" bson:"description"`
-	BirthDate   time.Time `json:"birth_date" bson:"birth_date" gorm:"default:null"`
-	Interest    string    `json:"interest" bson:"interest" gorm:"default:null"`
-	Address     string    `json:"address" bson:"address"`
-	City        string    `json:"city" bson:"city"`
-	State       string    `json:"state" bson:"state"`
-	Country     string    `json:"country" bson:"country"`
-	PostalCode  string    `json:"postal_code" bson:"postal_code"`
-	Telephone   string    `json:"telephone" bson:"telephone" gorm:"default:null"`
-	Mobile      string    `json:"mobile" bson:"mobile" gorm:"default:null"`
-	Website     string    `json:"website" bson:"website" gorm:"default:null"`
-	Geocode     string    `json:"geocode" bson:"geocode" gorm:"default:null"`
-	Longitude   float64   `json:"longitude" bson:"longitude" gorm:"default:null"`
-	Latitude    float64   `json:"latitude" bson:"latitude" gorm:"default:null"`
-	Finance     bool      `json:"finance" bson:"finance" gorm:"default:false"`
-	Active      bool      `json:"active" bson:"active" gorm:"default:true"`
+	Code            string    `json:"code" bson:"code"`
+	Name            string    `json:"name" bson:"name"`
+	Avatar          string 	  `json:"avatar" bson:"avatar"`
+	Background      string 	  `json:"background" bson:"background"`
+	Category        string    `json:"category" bson:"category"`
+	Description     string    `json:"description" bson:"description"`
+	LongDescription string    `json:"long_description" bson:"long_description"`
+	BirthDate       time.Time `json:"birth_date" bson:"birth_date" gorm:"default:null"`
+	Interest        string    `json:"interest" bson:"interest" gorm:"default:null"`
+	Address         string    `json:"address" bson:"address"`
+	City            string    `json:"city" bson:"city"`
+	State           string    `json:"state" bson:"state"`
+	Country         string    `json:"country" bson:"country"`
+	PostalCode      string    `json:"postal_code" bson:"postal_code"`
+	Telephone       string    `json:"telephone" bson:"telephone" gorm:"default:null"`
+	Mobile          string    `json:"mobile" bson:"mobile" gorm:"default:null"`
+	Website         string    `json:"website" bson:"website" gorm:"default:null"`
+	Geocode         string    `json:"geocode" bson:"geocode" gorm:"default:null"`
+	Longitude       float64   `json:"longitude" bson:"longitude" gorm:"default:null"`
+	Latitude        float64   `json:"latitude" bson:"latitude" gorm:"default:null"`
+	Finance         string    `json:"finance" bson:"finance" gorm:"default:none"`
+	Active          bool      `json:"active" bson:"active" gorm:"default:true"`
 }
 
 func (Community) TableName() string {
@@ -47,6 +50,8 @@ type CommunityMember struct {
 	User         User      `json:"-" gorm:"foreignkey:UserID"`
 	Creator      bool      `json:"creator" bson:"creator"`
 	Admin        bool      `json:"admin" bson:"admin"`
+	JoinBy       string    `json:"join_by" bson:"join_by" gorm:"default:invitation"`
+	Approved     bool      `json:"approved" bson:"approved" gorm:"default:false"`
 	AdditionInfo string    `json:"additional_info" bson:"additional_info"`
 }
 
