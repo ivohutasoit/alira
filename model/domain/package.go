@@ -11,9 +11,10 @@ import (
 type Subscribe struct {
 	model.BaseModel
 	Code         string    `json:"code" bson:"code"`
+	Name         string    `json:"name" bson:"name"`
 	Class        string    `json:"-" bson:"-" gorm:"default:USERSUBSCRIPTION"`
 	SubscriberID string    `json:"subscriber_id" bson:"subscriber_id" sql:"index"`
-	Purpose      string    `json:"purpose" bson:"purpose"`
+	Description  string    `json:"description" bson:"description"`
 	Signature    string    `json:"signature" bson:"signature"`
 	NotBefore    time.Time `json:"not_before" bson:"not_before"`
 	NotAfter     time.Time `json:"not_after" bson:"not_after"`
