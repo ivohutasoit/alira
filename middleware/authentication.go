@@ -19,25 +19,30 @@ func SessionHeaderRequired(args ...interface{}) gin.HandlerFunc {
 		panic("authentication uri must be provided")
 	}
 	return func(c *gin.Context) {
-		excepts := strings.Split(os.Getenv("EXCEPT_WEB"), ";")
-		optionals := strings.Split(os.Getenv("OPTIONAL_WEB"), ";")
-
 		currentPath := c.Request.URL.Path
-		for _, value := range excepts {
-			if strings.Contains(currentPath, strings.TrimSpace(value)) {
-				c.Next()
-				return
+		except := os.Getenv("WEB_EXCEPT")
+		if except != "" {
+			excepts := strings.Split(except, ";")
+			for _, value := range excepts {
+				if strings.Contains(currentPath, strings.TrimSpace(value)) {
+					c.Next()
+					return
+				}
 			}
 		}
 
-		optional := false
-		for _, value := range optionals {
-			if value == "/" && currentPath == "" {
-				optional = true
-				break
-			} else if currentPath == strings.TrimSpace(value) {
-				optional = true
-				break
+		opt := false
+		optional := os.Getenv("WEB_OPTIONAL")
+		if optional != "" {
+			optionals := strings.Split(optional, ";")
+			for _, value := range optionals {
+				if value == "/" && (currentPath == "" || currentPath == "/") {
+					opt = true
+					break
+				} else if currentPath == strings.TrimSpace(value) {
+					opt = true
+					break
+				}
 			}
 		}
 
@@ -49,7 +54,7 @@ func SessionHeaderRequired(args ...interface{}) gin.HandlerFunc {
 
 		session := sessions.Default(c)
 		accessToken := session.Get("access_token")
-		if accessToken == nil && !optional {
+		if accessToken == nil && !opt {
 			redirect := fmt.Sprintf("%s?redirect=%s", args[0].(string), url)
 			c.Redirect(http.StatusMovedPermanently, redirect)
 			c.Abort()
@@ -71,7 +76,7 @@ func SessionHeaderRequired(args ...interface{}) gin.HandlerFunc {
 			model.GetDatabase().First(sessionToken, "access_token = ? AND valid = ?",
 				strings.TrimSpace(accessToken.(string)), true)
 
-			if sessionToken == nil && !optional {
+			if sessionToken == nil && !opt {
 				redirect := fmt.Sprintf("%s?redirect=%s", args[0].(string), url)
 				c.Redirect(http.StatusMovedPermanently, redirect)
 				c.Abort()
@@ -81,7 +86,7 @@ func SessionHeaderRequired(args ...interface{}) gin.HandlerFunc {
 			model.GetDatabase().First(user, "id = ? AND active = ? AND deleted_at IS NULL",
 				sessionToken.UserID, true)
 
-			if user == nil && !optional {
+			if user == nil && !opt {
 				redirect := fmt.Sprintf("%s?redirect=%s", args[0].(string), url)
 				c.Redirect(http.StatusMovedPermanently, redirect)
 				c.Abort()
@@ -96,14 +101,16 @@ func SessionHeaderRequired(args ...interface{}) gin.HandlerFunc {
 
 func TokenHeaderRequired(args ...interface{}) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		excepts := strings.Split(os.Getenv("EXCEPT_API"), ";")
-
 		currentPath := c.Request.URL.Path
+		except := os.Getenv("API_EXCEPT")
+		if except != "" {
+			excepts := strings.Split(except, ";")
 
-		for _, value := range excepts {
-			if strings.Contains(currentPath, strings.TrimSpace(value)) {
-				c.Next()
-				return
+			for _, value := range excepts {
+				if strings.Contains(currentPath, strings.TrimSpace(value)) {
+					c.Next()
+					return
+				}
 			}
 		}
 
@@ -192,7 +199,6 @@ func TokenHeaderRequired(args ...interface{}) gin.HandlerFunc {
 		if tokens[0] == "Bearer" {
 			model.GetDatabase().First(sessionToken, "access_token = ? AND valid = ?",
 				tokenString, true)
-
 			if sessionToken == nil {
 				c.Header("Content-Type", "application/json")
 				c.JSON(http.StatusUnauthorized, gin.H{
@@ -232,7 +238,7 @@ func TokenHeaderRequired(args ...interface{}) gin.HandlerFunc {
 			sub = claims.(*domain.RefreshTokenClaims).Sub
 		}
 
-		model.GetDatabase().First(user, "user_id = ? AND active = ? AND deleted_at IS NULL",
+		model.GetDatabase().First(user, "id = ? AND active = ? AND deleted_at IS NULL",
 			userID, true)
 		if user == nil {
 			c.Header("Content-Type", "application/json")

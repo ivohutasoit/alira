@@ -1,46 +1,60 @@
 package domain
 
 import (
-	"github.com/ivohutasoit/alira/model"
+	"encoding/gob"
 	"time"
+
+	"github.com/ivohutasoit/alira/model"
 )
+
+func init() {
+	gob.Register(&Community{})
+	gob.Register(&CommunityMember{})
+}
 
 type Community struct {
 	model.BaseModel
-	Name        string
-	Category    string
-	Description string
-	BirthDate   time.Time
-	Interest    string
-	Street      string
-	City        string
-	Country     string
-	PostalCode  string
-	Telephone   string
-	Mobile      string
-	Website     string
-	Geocode     string
-	Longitude   float64
-	Latitude    float64
-	Finance     bool
-	Active      bool
+	Code            string    `json:"code" bson:"code"`
+	Name            string    `json:"name" bson:"name"`
+	Avatar          string 	  `json:"avatar" bson:"avatar"`
+	Background      string 	  `json:"background" bson:"background"`
+	Category        string    `json:"category" bson:"category"`
+	Description     string    `json:"description" bson:"description"`
+	LongDescription string    `json:"long_description" bson:"long_description"`
+	BirthDate       time.Time `json:"birth_date" bson:"birth_date" gorm:"default:null"`
+	Interest        string    `json:"interest" bson:"interest" gorm:"default:null"`
+	Address         string    `json:"address" bson:"address"`
+	City            string    `json:"city" bson:"city"`
+	State           string    `json:"state" bson:"state"`
+	Country         string    `json:"country" bson:"country"`
+	PostalCode      string    `json:"postal_code" bson:"postal_code"`
+	Telephone       string    `json:"telephone" bson:"telephone" gorm:"default:null"`
+	Mobile          string    `json:"mobile" bson:"mobile" gorm:"default:null"`
+	Website         string    `json:"website" bson:"website" gorm:"default:null"`
+	Geocode         string    `json:"geocode" bson:"geocode" gorm:"default:null"`
+	Longitude       float64   `json:"longitude" bson:"longitude" gorm:"default:null"`
+	Latitude        float64   `json:"latitude" bson:"latitude" gorm:"default:null"`
+	Finance         string    `json:"finance" bson:"finance" gorm:"default:none"`
+	Active          bool      `json:"active" bson:"active" gorm:"default:true"`
 }
 
 func (Community) TableName() string {
 	return "communities"
 }
 
-type CommunityUser struct {
+type CommunityMember struct {
 	model.BaseModel
-	CommunityID  string
-	Community    Community
-	UserID       string
-	User         User
-	Creator      bool
-	Admin        bool
-	AdditionInfo string
+	CommunityID  string    `json:"community_id" bson:"community_id"`
+	Community    Community `json:"-" gorm:"foreignkey:CommunityID"`
+	UserID       string    `json:"user_id" bson:"user_id"`
+	User         User      `json:"-" gorm:"foreignkey:UserID"`
+	Creator      bool      `json:"creator" bson:"creator"`
+	Admin        bool      `json:"admin" bson:"admin"`
+	JoinBy       string    `json:"join_by" bson:"join_by" gorm:"default:invitation"`
+	Approved     bool      `json:"approved" bson:"approved" gorm:"default:false"`
+	AdditionInfo string    `json:"additional_info" bson:"additional_info"`
 }
 
-func (CommunityUser) TableName() string {
-	return "community_users"
+func (CommunityMember) TableName() string {
+	return "community_members"
 }

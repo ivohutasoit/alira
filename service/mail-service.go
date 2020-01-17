@@ -12,6 +12,7 @@ import (
 type MailService struct{}
 
 func (ms *MailService) Send(mail *domain.Mail) (map[interface{}]interface{}, error) {
+	mail.From = os.Getenv("SMTP_SENDER")
 	var message string
 	for _, to := range mail.To {
 		body, _ := util.ParseMailTemplate(mail.Template, mail.Data)
@@ -21,9 +22,9 @@ func (ms *MailService) Send(mail *domain.Mail) (map[interface{}]interface{}, err
 			domain.MIME,
 			body,
 		)
-		mailSMTP := fmt.Sprintf("%s:%s", os.Getenv("SMTP.HOST"), os.Getenv("SMTP.PORT"))
+		mailSMTP := fmt.Sprintf("%s:%s", os.Getenv("SMTP_HOST"), os.Getenv("SMTP_PORT"))
 		if err := smtp.SendMail(mailSMTP, smtp.PlainAuth("", mail.From,
-			os.Getenv("SMTP.PASSWORD"), os.Getenv("SMTP.HOST")), os.Getenv("SMTP.NAME"),
+			os.Getenv("SMTP_PASSWORD"), os.Getenv("SMTP_HOST")), os.Getenv("SMTP_NAME"),
 			mail.To, []byte(fullbody)); err != nil {
 			return nil, err
 		}

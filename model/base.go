@@ -31,17 +31,17 @@ func init() {
 		fmt.Println("error loading .env file")
 	}
 
-	engine := os.Getenv("DATABASE.ENGINE")
+	engine := os.Getenv("DATABASE_ENGINE")
 	var conn *gorm.DB
 	if engine == "sqlite3" {
-		file := os.Getenv("DATABASE.FILE")
+		file := os.Getenv("DATABASE_FILE")
 		conn, err = gorm.Open(engine, file)
 	} else if engine == "postgres" {
-		host := os.Getenv("DATABASE.HOST")
-		port := os.Getenv("DATABASE.PORT")
-		schema := os.Getenv("DATABASE.SCHEMA")
-		username := os.Getenv("DATABASE.USERNAME")
-		password := os.Getenv("DATABASE.PASSWORD")
+		host := os.Getenv("DATABASE_HOST")
+		port := os.Getenv("DATABASE_PORT")
+		schema := os.Getenv("DATABASE_SCHEMA")
+		username := os.Getenv("DATABASE_USERNAME")
+		password := os.Getenv("DATABASE_PASSWORD")
 
 		uri := fmt.Sprintf("host=%s port=%s user=%s dbname=%s sslmode=disable password=%s",
 			host, port, username, schema, password)

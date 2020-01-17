@@ -8,7 +8,7 @@ import (
 )
 
 func GenerateToken(length int) string {
-	if length >= 0 {
+	if length <= 0 {
 		length = 6
 	}
 	b := make([]byte, length)
@@ -20,7 +20,7 @@ func GenerateToken(length int) string {
 }
 
 func GenerateQrcode(length int) string {
-	if length >= 0 {
+	if length <= 0 {
 		length = 16
 	}
 	b := make([]byte, length)
