@@ -24,7 +24,7 @@ func SessionHeaderRequired(args ...interface{}) gin.HandlerFunc {
 		if except != "" {
 			excepts := strings.Split(except, ";")
 			for _, value := range excepts {
-				if strings.Contains(currentPath, strings.TrimSpace(value)) {
+				if currentPath == strings.TrimSpace(value) {
 					c.Next()
 					return
 				}
@@ -107,7 +107,7 @@ func TokenHeaderRequired(args ...interface{}) gin.HandlerFunc {
 			excepts := strings.Split(except, ";")
 
 			for _, value := range excepts {
-				if strings.Contains(currentPath, strings.TrimSpace(value)) {
+				if currentPath == strings.TrimSpace(value) {
 					c.Next()
 					return
 				}
@@ -197,6 +197,16 @@ func TokenHeaderRequired(args ...interface{}) gin.HandlerFunc {
 		var userID string
 		var sub int
 		if tokens[0] == "Bearer" {
+			// https://tutorialedge.net/golang/consuming-restful-api-with-go/
+			/*jsonData := map[string]string{"token": tokenString}
+			jsonValue, _ := json.Marshal(jsonData)
+			response, err := http.Post("http://localhost:9000/api/alpha/token/detail/", "application/json", bytes.NewBuffer(jsonValue))
+			if err != nil {
+				fmt.Printf("The HTTP request failed with error %s\n", err)
+			} else {
+				data, _ := ioutil.ReadAll(response.Body)
+				fmt.Println(string(data))
+			}*/
 			model.GetDatabase().First(sessionToken, "access_token = ? AND valid = ?",
 				tokenString, true)
 			if sessionToken == nil {
