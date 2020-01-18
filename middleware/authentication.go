@@ -24,7 +24,7 @@ func SessionHeaderRequired(args ...interface{}) gin.HandlerFunc {
 		if except != "" {
 			excepts := strings.Split(except, ";")
 			for _, value := range excepts {
-				if strings.Contains(currentPath, strings.TrimSpace(value)) {
+				if currentPath == strings.TrimSpace(value) {
 					c.Next()
 					return
 				}
@@ -107,7 +107,7 @@ func TokenHeaderRequired(args ...interface{}) gin.HandlerFunc {
 			excepts := strings.Split(except, ";")
 
 			for _, value := range excepts {
-				if strings.Contains(currentPath, strings.TrimSpace(value)) {
+				if currentPath == strings.TrimSpace(value) {
 					c.Next()
 					return
 				}
