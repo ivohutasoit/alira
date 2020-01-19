@@ -14,10 +14,10 @@ import (
 var db *gorm.DB
 
 type BaseModel struct {
-	ID        string     `gorm:"primary_key" json:"id" bson:"id"`
+	ID        string     `json:"id" bson:"id" gorm:"primary_key" `
 	CreatedAt time.Time  `json:"-"`
 	UpdatedAt time.Time  `json:"-"`
-	DeletedAt *time.Time `sql:"index" json:"-"`
+	DeletedAt *time.Time `json:"-" sql:"index"`
 }
 
 func (base *BaseModel) BeforeCreate(scope *gorm.Scope) error {
