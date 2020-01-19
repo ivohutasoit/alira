@@ -1,7 +1,10 @@
 package middleware
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"strings"
@@ -9,15 +12,14 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
-	"github.com/ivohutasoit/alira/model"
 	"github.com/ivohutasoit/alira/model/domain"
 	"github.com/ivohutasoit/alira/util"
 )
 
 func SessionHeaderRequired(args ...interface{}) gin.HandlerFunc {
-	if 1 > len(args) {
+	/*if 1 > len(args) {
 		panic("authentication uri must be provided")
-	}
+	}*/
 	return func(c *gin.Context) {
 		currentPath := c.Request.URL.Path
 		except := os.Getenv("WEB_EXCEPT")
@@ -46,16 +48,15 @@ func SessionHeaderRequired(args ...interface{}) gin.HandlerFunc {
 			}
 		}
 
-		url, err := util.GenerateUrl(c.Request.TLS, c.Request.Host, c.Request.URL.Path, true)
+		url, err := util.GenerateUrl(c.Request.TLS, c.Request.Host, currentPath, true)
 		if err != nil {
 			fmt.Println(err)
-			return
 		}
+		redirect := fmt.Sprintf("%s?redirect=%s", os.Getenv("URL_LOGIN"), url)
 
 		session := sessions.Default(c)
 		accessToken := session.Get("access_token")
 		if accessToken == nil && !opt {
-			redirect := fmt.Sprintf("%s?redirect=%s", args[0].(string), url)
 			c.Redirect(http.StatusMovedPermanently, redirect)
 			c.Abort()
 			return
@@ -66,35 +67,38 @@ func SessionHeaderRequired(args ...interface{}) gin.HandlerFunc {
 				return []byte(os.Getenv("SECRET_KEY")), nil
 			})
 			if err != nil || !token.Valid {
-				redirect := fmt.Sprintf("%s?redirect=%s", args[0].(string), url)
 				c.Redirect(http.StatusMovedPermanently, redirect)
 				c.Abort()
 				return
 			}
 
-			sessionToken := &domain.Token{}
-			model.GetDatabase().First(sessionToken, "access_token = ? AND valid = ?",
-				strings.TrimSpace(accessToken.(string)), true)
-
-			if sessionToken == nil && !opt {
-				redirect := fmt.Sprintf("%s?redirect=%s", args[0].(string), url)
+			data := map[string]string{
+				"type":  "Bearer",
+				"token": accessToken.(string),
+			}
+			// https://tutorialedge.net/golang/consuming-restful-api-with-go/
+			payload, _ := json.Marshal(data)
+			resp, err := http.Post(os.Getenv("URL_AUTH"), "application/json", bytes.NewBuffer(payload))
+			if err != nil && !opt {
 				c.Redirect(http.StatusMovedPermanently, redirect)
 				c.Abort()
 				return
 			}
-			user := &domain.User{}
-			model.GetDatabase().First(user, "id = ? AND active = ? AND deleted_at IS NULL",
-				sessionToken.UserID, true)
-
-			if user == nil && !opt {
-				redirect := fmt.Sprintf("%s?redirect=%s", args[0].(string), url)
+			respData, err := ioutil.ReadAll(resp.Body)
+			if err != nil && !opt {
 				c.Redirect(http.StatusMovedPermanently, redirect)
 				c.Abort()
 				return
 			}
-			c.Set("userid", user.ID)
+			var response domain.Response
+			json.Unmarshal(respData, &response)
+			if response.Code != http.StatusOK && !opt {
+				c.Redirect(http.StatusMovedPermanently, redirect)
+				c.Abort()
+				return
+			}
+			c.Set("userid", response.Data["userid"])
 		}
-
 		c.Next()
 	}
 }
@@ -191,36 +195,7 @@ func TokenHeaderRequired(args ...interface{}) gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-
-		user := &domain.User{}
-		sessionToken := &domain.Token{}
-		var userID string
-		var sub int
-		if tokens[0] == "Bearer" {
-			// https://tutorialedge.net/golang/consuming-restful-api-with-go/
-			/*jsonData := map[string]string{"token": tokenString}
-			jsonValue, _ := json.Marshal(jsonData)
-			response, err := http.Post("http://localhost:9000/api/alpha/token/detail/", "application/json", bytes.NewBuffer(jsonValue))
-			if err != nil {
-				fmt.Printf("The HTTP request failed with error %s\n", err)
-			} else {
-				data, _ := ioutil.ReadAll(response.Body)
-				fmt.Println(string(data))
-			}*/
-			model.GetDatabase().First(sessionToken, "access_token = ? AND valid = ?",
-				tokenString, true)
-			if sessionToken == nil {
-				c.Header("Content-Type", "application/json")
-				c.JSON(http.StatusUnauthorized, gin.H{
-					"code":   401,
-					"status": "Unauthorized",
-					"error":  "invalid token",
-				})
-				c.Abort()
-				return
-			}
-			userID = sessionToken.UserID
-		} else if tokens[0] == "Refresh" {
+		if tokens[0] == "Refresh" {
 			if claims.(*domain.RefreshTokenClaims).Sub != 1 {
 				c.Header("Content-Type", "application/json")
 				c.JSON(http.StatusUnauthorized, gin.H{
@@ -231,38 +206,46 @@ func TokenHeaderRequired(args ...interface{}) gin.HandlerFunc {
 				c.Abort()
 				return
 			}
-			model.GetDatabase().First(&sessionToken, "refresh_token = ? AND valid = ?",
-				tokenString, true)
-
-			if sessionToken == nil {
-				c.Header("Content-Type", "application/json")
-				c.JSON(http.StatusUnauthorized, gin.H{
-					"code":   401,
-					"status": "Unauthorized",
-					"error":  "invalid refresh token",
-				})
-				c.Abort()
-				return
-			}
-			userID = sessionToken.UserID
-			sub = claims.(*domain.RefreshTokenClaims).Sub
 		}
 
-		model.GetDatabase().First(user, "id = ? AND active = ? AND deleted_at IS NULL",
-			userID, true)
-		if user == nil {
-			c.Header("Content-Type", "application/json")
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"code":   401,
-				"status": "Unauthorized",
-				"error":  "invalid user",
+		data := map[string]string{
+			"type":  tokens[0],
+			"token": tokenString,
+		}
+		// https://tutorialedge.net/golang/consuming-restful-api-with-go/
+		payload, _ := json.Marshal(data)
+		resp, err := http.Post(os.Getenv("URL_AUTH"), "application/json", bytes.NewBuffer(payload))
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+				"code":   http.StatusUnauthorized,
+				"status": http.StatusText(http.StatusUnauthorized),
+				"error":  "unable to verify token",
 			})
-			c.Abort()
 			return
 		}
-		c.Set("userid", user.ID)
-		c.Set("sub", sub)
-
+		respData, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+				"code":   http.StatusUnauthorized,
+				"status": http.StatusText(http.StatusUnauthorized),
+				"error":  "unable to read detail token",
+			})
+			return
+		}
+		var response domain.Response
+		json.Unmarshal(respData, &response)
+		if response.Code != http.StatusOK {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+				"code":   http.StatusUnauthorized,
+				"status": http.StatusText(http.StatusUnauthorized),
+				"error":  "unable to apply detail token",
+			})
+			return
+		}
+		c.Set("userid", response.Data["userid"])
+		if tokens[0] == "Refresh" {
+			c.Set("sub", claims.(*domain.RefreshTokenClaims).Sub)
+		}
 		c.Next()
 	}
 }
