@@ -98,6 +98,7 @@ func SessionHeaderRequired(args ...interface{}) gin.HandlerFunc {
 				return
 			}
 			c.Set("userid", response.Data["userid"])
+			domain.Page["userid"] = response.Data["userid"]
 		}
 		c.Next()
 	}
