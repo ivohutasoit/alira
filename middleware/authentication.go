@@ -101,8 +101,10 @@ func SessionHeaderRequired(args ...interface{}) gin.HandlerFunc {
 				c.Abort()
 				return
 			}
-			c.Set("userid", response.Data["userid"])
-			domain.Page["userid"] = response.Data["userid"]
+			c.Set("user_id", response.Data["user_id"])
+			domain.Page["user_id"] = response.Data["user_id"]
+			domain.Page["username"] = response.Data["username"]
+			domain.Page["url_logout"] = fmt.Sprintf("%s?redirect=%s", os.Getenv("URL_LOGOUT"), url)
 		}
 		c.Next()
 	}
@@ -116,7 +118,12 @@ func TokenHeaderRequired(args ...interface{}) gin.HandlerFunc {
 			excepts := strings.Split(except, ";")
 
 			for _, value := range excepts {
-				if currentPath == strings.TrimSpace(value) {
+				if c.Request.Method == http.MethodGet {
+					if strings.Index(currentPath, value) > 0 {
+						c.Next()
+						return
+					}
+				} else if currentPath == strings.TrimSpace(value) {
 					c.Next()
 					return
 				}
