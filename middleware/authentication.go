@@ -41,9 +41,13 @@ func SessionHeaderRequired(args ...interface{}) gin.HandlerFunc {
 				if value == "/" && (currentPath == "" || currentPath == "/") {
 					opt = true
 					break
-				} else if currentPath == strings.TrimSpace(value) {
-					opt = true
-					break
+				} else {
+					if c.Request.Method == http.MethodGet {
+						if strings.Index(currentPath, value) > 0 {
+							opt = true
+							return
+						}
+					}
 				}
 			}
 		}
