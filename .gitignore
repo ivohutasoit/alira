@@ -1,7 +1,8 @@
 .env
 *.db
 go.sum
-account
-chatting
-community
-mobile
+/account
+/chatting
+/commerce
+/community
+/mobile

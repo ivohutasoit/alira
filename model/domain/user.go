@@ -31,11 +31,14 @@ type RefreshTokenClaims struct {
 // User hold information about an user
 type User struct {
 	model.BaseModel
-	Username string `json:"username" bson:"username"`
-	Email    string `json:"email" bson:"email"`
-	Mobile   string `json:"mobile" bson:"mobile"`
-	Avatar   string `json:"avatar" bson:"avatar"`
-	Active   bool   `json:"active" bson:"active" gorm:"default:false"`
+	Username       string `json:"username" bson:"username"`
+	Email          string `json:"email" bson:"email"`
+	Mobile         string `json:"mobile" bson:"mobile"`
+	Avatar         string `json:"avatar" bson:"avatar"`
+	Active         bool   `json:"active" bson:"active" gorm:"default:false"`
+	FirstTimeLogin bool   `form:"-" json:"-" bson:"-" xml:"-" grom:"default:true"`
+	UsingPin       bool   `form:"-" json:"-" bson:"-" xml:"-" grom:"default:true"`
+	Pin            string `form:"-" json:"-" bson:"-" xml:"-"`
 }
 
 func (User) TableName() string {
