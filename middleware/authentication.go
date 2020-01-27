@@ -102,9 +102,11 @@ func SessionHeaderRequired(args ...interface{}) gin.HandlerFunc {
 				return
 			}
 			c.Set("user_id", response.Data["user_id"])
-			domain.Page["user_id"] = response.Data["user_id"]
-			domain.Page["username"] = response.Data["username"]
-			domain.Page["url_logout"] = fmt.Sprintf("%s?redirect=%s", os.Getenv("URL_LOGOUT"), url)
+			domain.Page = gin.H{
+				"user_id":    response.Data["user_id"],
+				"username":   response.Data["username"],
+				"url_logout": fmt.Sprintf("%s?redirect=%s", os.Getenv("URL_LOGOUT"), url),
+			}
 		}
 		c.Next()
 	}
