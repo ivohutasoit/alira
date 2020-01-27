@@ -16,17 +16,17 @@ type Parameter struct {
 }
 
 type Paginator struct {
-	TotalRecord  int `json:"total_record"`
-	TotalPage    int
-	Records      interface{}
-	Offset       int
-	Limit        int
-	CurrentPage  int
-	PreviousPage int
-	NextPage     int
+	TotalRecord  int         `json:"total_record"`
+	TotalPage    int         `json:"total_page"`
+	Records      interface{} `json:"records"`
+	Offset       int         `json:"offset"`
+	Limit        int         `json:"limit"`
+	CurrentPage  int         `json:"current_page"`
+	PreviousPage int         `json:"previous_page"`
+	NextPage     int         `json:"next_page"`
 }
 
-func Initialize(p *Parameter) *Paginator {
+func NewPaginator(p *Parameter) *Paginator {
 	database := p.Database
 
 	if p.ShowSQL {
