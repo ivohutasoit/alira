@@ -1,4 +1,4 @@
-package commece
+package commerce
 
 import (
 	"time"
@@ -9,7 +9,6 @@ import (
 type Customer struct {
 	alira.BaseModel
 	Class     string `form:"class" json:"class" bson:"class" xml:"class" gorm:"default:SHOPOWNER"` // DISTRIBUTOR
-	UserID    string `form:"user_id" json:"user_id" bson:"user_id" xml:"user_id"`
 	CreatedBy string `form:"-" json:"-" bson:"-" xml:"-"`
 	UpdatedBy string `form:"-" json:"-" bson:"-" xml:"-"`
 	Code      string `form:"code" json:"code" bson:"code" xml:"code"`
@@ -19,6 +18,13 @@ type Customer struct {
 
 func (Customer) TableName() string {
 	return "customers"
+}
+
+type CustomerUser struct {
+	alira.BaseModel
+	CustomerID string `form:"customer_id" json:"customer_id" bson:"customer_id" xml:"customer_id"`
+	UserID     string `form:"user_id" json:"user_id" bson:"user_id" xml:"user_id"`
+	Role       string `form:"role" json:"role" bson:"role" xml:"role" gorm:"default:OWNER"`
 }
 
 type Store struct {
@@ -44,6 +50,7 @@ type StoreProduct struct {
 	alira.BaseModel
 	StoreID   string `form:"store_id" json:"store_id" bson:"store_id" xml:"store_id"`
 	ProductID string `form:"product_id" json:"product_id" bson:"product_id" xml:"product_id"`
+	Name      string `form:"name" json:"name" bson:"name" xml:"name"`
 	Image     string `form:"image" json:"image" bson:"image" xml:"image"`
 	RackNo    string `form:"rack_no" json:"rack_no" bson:"rack_no" xml:"rack_no"`
 	Available int64  `form:"available" json:"available" bson:"available" xml:"available" gorm:"default:0"`
