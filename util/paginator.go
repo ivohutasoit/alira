@@ -6,8 +6,9 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-type Parameter struct {
+type PaginatorParameter struct {
 	Database *gorm.DB
+	Count    interface{}
 	Result   interface{}
 	Page     int
 	Limit    int
@@ -26,7 +27,7 @@ type Paginator struct {
 	NextPage     int         `json:"next_page"`
 }
 
-func NewPaginator(p *Parameter) *Paginator {
+func NewPaginator(p *PaginatorParameter) *Paginator {
 	database := p.Database
 
 	if p.ShowSQL {
@@ -51,7 +52,7 @@ func NewPaginator(p *Parameter) *Paginator {
 	var paginator Paginator
 	var count, offset int
 
-	go countRecords(database, p.Result, done, &count)
+	go countRecords(database, p.Count, done, &count)
 
 	if p.Page == 1 {
 		offset = 0
@@ -59,16 +60,15 @@ func NewPaginator(p *Parameter) *Paginator {
 		offset = (p.Page - 1) * p.Limit
 	}
 
-	database.Limit(p.Limit).Offset(offset).Find(p.Result)
+	database.Limit(p.Limit).Offset(offset).Scan(p.Result)
 	<-done
 
 	paginator.TotalRecord = count
-	paginator.Records = p.Result
+	paginator.TotalPage = int(math.Ceil(float64(count) / float64(p.Limit)))
 	paginator.CurrentPage = p.Page
-
 	paginator.Offset = offset
 	paginator.Limit = p.Limit
-	paginator.TotalPage = int(math.Ceil(float64(count) / float64(p.Limit)))
+	paginator.Records = p.Result
 
 	if p.Page > 1 {
 		paginator.PreviousPage = p.Page
@@ -79,7 +79,7 @@ func NewPaginator(p *Parameter) *Paginator {
 	return &paginator
 }
 
-func countRecords(database *gorm.DB, any interface{}, done chan bool, count *int) {
-	database.Model(any).Count(count)
+func countRecords(database *gorm.DB, out interface{}, done chan bool, count *int) {
+	database.Scan(out).Count(count)
 	done <- true
 }
