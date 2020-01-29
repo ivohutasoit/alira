@@ -1,4 +1,4 @@
-package domain
+package messaging
 
 import "gopkg.in/mgo.v2/bson"
 

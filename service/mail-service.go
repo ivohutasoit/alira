@@ -5,13 +5,34 @@ import (
 	"net/smtp"
 	"os"
 
-	"github.com/ivohutasoit/alira/model/domain"
 	"github.com/ivohutasoit/alira/util"
 )
 
+type Mail struct {
+	From     string
+	To       []string
+	Subject  string
+	Template string
+	Data     map[interface{}]interface{}
+}
+
+const (
+	MIME = "MIME-VERSION: 1.0;\nContent-Type: text/html; charset:\"UTF-8\";\n\n"
+)
+
+func (m *Mail) NewMail(from string, to []string, subject string, template string, data map[interface{}]interface{}) *Mail {
+	return &Mail{
+		From:     from,
+		To:       to,
+		Subject:  subject,
+		Template: template,
+		Data:     data,
+	}
+}
+
 type MailService struct{}
 
-func (ms *MailService) Send(mail *domain.Mail) (map[interface{}]interface{}, error) {
+func (ms *MailService) Send(mail *Mail) (map[interface{}]interface{}, error) {
 	mail.From = os.Getenv("SMTP_SENDER")
 	var message string
 	for _, to := range mail.To {
@@ -19,7 +40,7 @@ func (ms *MailService) Send(mail *domain.Mail) (map[interface{}]interface{}, err
 		fullbody := fmt.Sprintf("From: %s\r\nTo: %s\r\nSubject: %s\r\n%s\r\n%s", mail.From,
 			to,
 			mail.Subject,
-			domain.MIME,
+			MIME,
 			body,
 		)
 		mailSMTP := fmt.Sprintf("%s:%s", os.Getenv("SMTP_HOST"), os.Getenv("SMTP_PORT"))

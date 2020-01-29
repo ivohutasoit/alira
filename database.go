@@ -1,29 +1,14 @@
-package model
+package alira
 
 import (
 	"fmt"
 	"os"
-	"time"
 
-	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"github.com/joho/godotenv"
 )
 
-var db *gorm.DB
-
-type BaseModel struct {
-	ID        string     `json:"id" bson:"id" gorm:"primary_key" `
-	CreatedAt time.Time  `json:"-"`
-	UpdatedAt time.Time  `json:"-"`
-	DeletedAt *time.Time `json:"-" sql:"index"`
-}
-
-func (base *BaseModel) BeforeCreate(scope *gorm.Scope) error {
-	scope.SetColumn("ID", uuid.New().String())
-	return nil
-}
+var connection *gorm.DB
 
 func init() {
 	err := godotenv.Load()
@@ -54,9 +39,9 @@ func init() {
 		fmt.Print(err)
 	}
 
-	db = conn
+	connection = conn
 }
 
-func GetDatabase() *gorm.DB {
-	return db
+func GetConnection() *gorm.DB {
+	return connection
 }

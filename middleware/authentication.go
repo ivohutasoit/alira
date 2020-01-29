@@ -12,6 +12,8 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	alira "github.com/ivohutasoit/alira"
+	"github.com/ivohutasoit/alira/database/account"
 	"github.com/ivohutasoit/alira/model/domain"
 	"github.com/ivohutasoit/alira/util"
 )
@@ -66,7 +68,7 @@ func SessionHeaderRequired(args ...interface{}) gin.HandlerFunc {
 			return
 		}
 		if accessToken != nil {
-			claims := &domain.AccessTokenClaims{}
+			claims := &account.AccessTokenClaims{}
 			token, err := jwt.ParseWithClaims(accessToken.(string), claims, func(token *jwt.Token) (interface{}, error) {
 				return []byte(os.Getenv("SECRET_KEY")), nil
 			})
@@ -95,16 +97,33 @@ func SessionHeaderRequired(args ...interface{}) gin.HandlerFunc {
 				return
 			}
 			var response domain.Response
-			json.Unmarshal(respData, &response)
+			if err := json.Unmarshal(respData, &response); err != nil && !opt {
+				fmt.Println(err)
+				c.Redirect(http.StatusMovedPermanently, redirect)
+				c.Abort()
+				return
+			}
+
 			if response.Code != http.StatusOK && !opt {
 				c.Redirect(http.StatusMovedPermanently, redirect)
 				c.Abort()
 				return
 			}
-			c.Set("user_id", response.Data["user_id"])
-			domain.Page["user_id"] = response.Data["user_id"]
-			domain.Page["username"] = response.Data["username"]
-			domain.Page["url_logout"] = fmt.Sprintf("%s?redirect=%s", os.Getenv("URL_LOGOUT"), url)
+
+			var authentitedUser domain.AuthenticatedUser
+			if err := json.Unmarshal([]byte(response.Data), &authentitedUser); err != nil && !opt {
+				fmt.Println(err)
+				c.Redirect(http.StatusMovedPermanently, redirect)
+				c.Abort()
+				return
+			}
+
+			c.Set("user_id", authentitedUser.UserID)
+			alira.ViewData = gin.H{
+				"user_id":    authentitedUser.UserID,
+				"username":   authentitedUser.Username,
+				"url_logout": fmt.Sprintf("%s?redirect=%s", os.Getenv("URL_LOGOUT"), url),
+			}
 		}
 		c.Next()
 	}
@@ -133,51 +152,43 @@ func TokenHeaderRequired(args ...interface{}) gin.HandlerFunc {
 		authorization := c.Request.Header.Get("Authorization")
 
 		if authorization == "" {
-			c.Header("Content-Type", "application/json")
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"code":   401,
-				"status": "Unauthorized",
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+				"code":   http.StatusUnauthorized,
+				"status": http.StatusText(http.StatusUnauthorized),
 				"error":  "missing authorization token",
 			})
-			c.Abort()
 			return
 		}
 
 		tokens := strings.Split(authorization, " ")
 		if len(tokens) != 2 {
-			c.Header("Content-Type", "application/json")
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"code":   401,
-				"status": "Unauthorized",
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+				"code":   http.StatusUnauthorized,
+				"status": http.StatusText(http.StatusUnauthorized),
 				"error":  "invalid token",
 			})
-			c.Abort()
 			return
 		}
 
 		var claims jwt.Claims
 		if tokens[0] == "Bearer" {
-			claims = &domain.AccessTokenClaims{}
+			claims = &account.AccessTokenClaims{}
 		} else if tokens[0] == "Refresh" {
 			if currentPath != "/api/alpha/auth/refresh" {
-				c.Header("Content-Type", "application/json")
-				c.JSON(http.StatusUnauthorized, gin.H{
-					"code":   401,
-					"status": "Unauthorized",
+				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+					"code":   http.StatusUnauthorized,
+					"status": http.StatusText(http.StatusUnauthorized),
 					"error":  "invalid refresh uri",
 				})
-				c.Abort()
 				return
 			}
-			claims = &domain.RefreshTokenClaims{}
+			claims = &account.RefreshTokenClaims{}
 		} else {
-			c.Header("Content-Type", "application/json")
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"code":   401,
-				"status": "Unauthorized",
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+				"code":   http.StatusUnauthorized,
+				"status": http.StatusText(http.StatusUnauthorized),
 				"error":  "invalid token indentifier",
 			})
-			c.Abort()
 			return
 		}
 
@@ -187,35 +198,29 @@ func TokenHeaderRequired(args ...interface{}) gin.HandlerFunc {
 		})
 
 		if err != nil {
-			c.Header("Content-Type", "application/json")
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"code":   401,
-				"status": "Unauthorized",
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+				"code":   http.StatusUnauthorized,
+				"status": http.StatusText(http.StatusUnauthorized),
 				"error":  err.Error(),
 			})
-			c.Abort()
 			return
 		}
 
 		if !token.Valid {
-			c.Header("Content-Type", "application/json")
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"code":   401,
-				"status": "Unauthorized",
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+				"code":   http.StatusUnauthorized,
+				"status": http.StatusText(http.StatusUnauthorized),
 				"error":  "invalid token",
 			})
-			c.Abort()
 			return
 		}
 		if tokens[0] == "Refresh" {
-			if claims.(*domain.RefreshTokenClaims).Sub != 1 {
-				c.Header("Content-Type", "application/json")
-				c.JSON(http.StatusUnauthorized, gin.H{
-					"code":   401,
-					"status": "Unauthorized",
+			if claims.(*account.RefreshTokenClaims).Sub != 1 {
+				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+					"code":   http.StatusUnauthorized,
+					"status": http.StatusText(http.StatusUnauthorized),
 					"error":  "invalid refresh token",
 				})
-				c.Abort()
 				return
 			}
 		}
@@ -245,7 +250,10 @@ func TokenHeaderRequired(args ...interface{}) gin.HandlerFunc {
 			return
 		}
 		var response domain.Response
-		json.Unmarshal(respData, &response)
+		if err := json.Unmarshal(respData, &response); err != nil {
+			fmt.Println(err)
+		}
+
 		if response.Code != http.StatusOK {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 				"code":   http.StatusUnauthorized,
@@ -254,9 +262,14 @@ func TokenHeaderRequired(args ...interface{}) gin.HandlerFunc {
 			})
 			return
 		}
-		c.Set("userid", response.Data["userid"])
+
+		var authentitedUser domain.AuthenticatedUser
+		if err := json.Unmarshal([]byte(response.Data), &authentitedUser); err != nil {
+			fmt.Println(err)
+		}
+		c.Set("user_id", authentitedUser.UserID)
 		if tokens[0] == "Refresh" {
-			c.Set("sub", claims.(*domain.RefreshTokenClaims).Sub)
+			c.Set("sub", claims.(*account.RefreshTokenClaims).Sub)
 		}
 		c.Next()
 	}
