@@ -1,4 +1,4 @@
-package main
+package alira
 
 import "encoding/json"
 
