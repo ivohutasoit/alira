@@ -1,4 +1,4 @@
-package acount
+package account
 
 import (
 	"time"
