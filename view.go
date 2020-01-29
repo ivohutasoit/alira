@@ -1,5 +1,5 @@
-package domain
+package util
 
 import "github.com/gin-gonic/gin"
 
-var Page gin.H
+var ViewData gin.H

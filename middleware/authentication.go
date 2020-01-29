@@ -12,6 +12,8 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	alira "github.com/ivohutasoit/alira"
+	"github.com/ivohutasoit/alira/database/account"
 	"github.com/ivohutasoit/alira/model/domain"
 	"github.com/ivohutasoit/alira/util"
 )
@@ -66,7 +68,7 @@ func SessionHeaderRequired(args ...interface{}) gin.HandlerFunc {
 			return
 		}
 		if accessToken != nil {
-			claims := &domain.AccessTokenClaims{}
+			claims := &account.AccessTokenClaims{}
 			token, err := jwt.ParseWithClaims(accessToken.(string), claims, func(token *jwt.Token) (interface{}, error) {
 				return []byte(os.Getenv("SECRET_KEY")), nil
 			})
@@ -117,7 +119,7 @@ func SessionHeaderRequired(args ...interface{}) gin.HandlerFunc {
 			}
 
 			c.Set("user_id", authentitedUser.UserID)
-			domain.Page = gin.H{
+			alira.ViewData = gin.H{
 				"user_id":    authentitedUser.UserID,
 				"username":   authentitedUser.Username,
 				"url_logout": fmt.Sprintf("%s?redirect=%s", os.Getenv("URL_LOGOUT"), url),
@@ -170,7 +172,7 @@ func TokenHeaderRequired(args ...interface{}) gin.HandlerFunc {
 
 		var claims jwt.Claims
 		if tokens[0] == "Bearer" {
-			claims = &domain.AccessTokenClaims{}
+			claims = &account.AccessTokenClaims{}
 		} else if tokens[0] == "Refresh" {
 			if currentPath != "/api/alpha/auth/refresh" {
 				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
@@ -180,7 +182,7 @@ func TokenHeaderRequired(args ...interface{}) gin.HandlerFunc {
 				})
 				return
 			}
-			claims = &domain.RefreshTokenClaims{}
+			claims = &account.RefreshTokenClaims{}
 		} else {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 				"code":   http.StatusUnauthorized,
@@ -213,7 +215,7 @@ func TokenHeaderRequired(args ...interface{}) gin.HandlerFunc {
 			return
 		}
 		if tokens[0] == "Refresh" {
-			if claims.(*domain.RefreshTokenClaims).Sub != 1 {
+			if claims.(*account.RefreshTokenClaims).Sub != 1 {
 				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 					"code":   http.StatusUnauthorized,
 					"status": http.StatusText(http.StatusUnauthorized),
@@ -267,7 +269,7 @@ func TokenHeaderRequired(args ...interface{}) gin.HandlerFunc {
 		}
 		c.Set("user_id", authentitedUser.UserID)
 		if tokens[0] == "Refresh" {
-			c.Set("sub", claims.(*domain.RefreshTokenClaims).Sub)
+			c.Set("sub", claims.(*account.RefreshTokenClaims).Sub)
 		}
 		c.Next()
 	}
