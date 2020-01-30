@@ -10,12 +10,10 @@ import (
 
 type Customer struct {
 	alira.Model
-	Class     string `gorm:"default:SHOPOWNER"` // DISTRIBUTOR
-	CreatedBy string
-	UpdatedBy string
-	Code      string
-	Status    string `grom:"default:INACTIVE"`
-	Payment   bool   `grom:"default:false"`
+	Class   string `gorm:"default:SHOPOWNER"` // DISTRIBUTOR
+	Code    string
+	Status  string `grom:"default:INACTIVE"`
+	Payment bool   `grom:"default:false"`
 }
 
 func (Customer) TableName() string {
