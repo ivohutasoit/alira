@@ -6,10 +6,10 @@ import (
 	"errors"
 	"html/template"
 
-	alira "github.com/ivohutasoit/alira"
+	"github.com/ivohutasoit/alira"
 )
 
-type Parser struct {}
+type Parser struct{}
 
 func (p *Parser) MailTemplate(name string, data interface{}) (interface{}, error) {
 	tmpl, err := template.ParseFiles(name)
@@ -25,20 +25,21 @@ func (p *Parser) MailTemplate(name string, data interface{}) (interface{}, error
 }
 
 func (p *Parser) MarshalResponse(response alira.Response, out interface{}) error {
-	
+	return nil
 }
 
-func (p *Parser) UnmarshalResponse(data []byte, code int, response alira.Response, out interface{}) error {
+func (p *Parser) UnmarshalResponse(data []byte, code int, out interface{}) (interface{}, error) {
+	response := &alira.Response{}
 	if err := json.Unmarshal(data, &response); err != nil {
-		return err
+		return nil, err
 	}
 
 	if response.Code != code {
-		return errors.New("unexpected code return")
+		return nil, errors.New("unexpected code return")
 	}
 
 	if err := json.Unmarshal([]byte(response.Data), &out); err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return response, nil
 }
