@@ -9,7 +9,9 @@ import (
 	alira "github.com/ivohutasoit/alira"
 )
 
-func ParseMailTemplate(name string, data interface{}) (interface{}, error) {
+type Parser struct {}
+
+func (p *Parser) MailTemplate(name string, data interface{}) (interface{}, error) {
 	tmpl, err := template.ParseFiles(name)
 	if err != nil {
 		return nil, err
@@ -22,7 +24,11 @@ func ParseMailTemplate(name string, data interface{}) (interface{}, error) {
 	return buff.String(), nil
 }
 
-func ParseResponse(data []byte, code int, response alira.Response, out interface{}) error {
+func (p *Parser) MarshalResponse(response alira.Response, out interface{}) error {
+	
+}
+
+func (p *Parser) UnmarshalResponse(data []byte, code int, response alira.Response, out interface{}) error {
 	if err := json.Unmarshal(data, &response); err != nil {
 		return err
 	}
