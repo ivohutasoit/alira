@@ -44,11 +44,31 @@ type Store struct {
 	Geocode    string  `gorm:"default:null"`
 	Longitude  float64 `gorm:"default:null"`
 	Latitude   float64 `gorm:"default:null"`
-	Status string `gorm:"default:OPEN"`
+	Status     string  `gorm:"default:OPEN"`
 }
 
 func (Store) TableName() string {
 	return "stores"
+}
+
+type StoreUser struct {
+	alira.Model
+	CustomerUserID string
+	StoreID        string
+	Role           string `gorm:"default:TELLER"`
+	NotBefore      time.Time
+	NotAfter       time.Time `gorm:"default:null"`
+	Status         string
+}
+
+func (model *StoreUser) BeforeCreate(scope *gorm.Scope) error {
+	scope.SetColumn("ID", uuid.New().String())
+	scope.SetColumn("NotBefore", time.Now())
+	return nil
+}
+
+func (StoreUser) TableName() string {
+	return "store_users"
 }
 
 type StoreProduct struct {
