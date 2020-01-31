@@ -35,7 +35,7 @@ type MailService struct{}
 func (ms *MailService) Send(mail *Mail) (map[interface{}]interface{}, error) {
 	mail.From = os.Getenv("SMTP_SENDER")
 	var message string
-	parser := &util.Parse{}
+	parser := &util.Parser{}
 	for _, to := range mail.To {
 		body, _ := parser.MailTemplate(mail.Template, mail.Data)
 		fullbody := fmt.Sprintf("From: %s\r\nTo: %s\r\nSubject: %s\r\n%s\r\n%s", mail.From,
