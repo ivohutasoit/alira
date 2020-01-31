@@ -44,6 +44,7 @@ type Store struct {
 	Geocode    string  `gorm:"default:null"`
 	Longitude  float64 `gorm:"default:null"`
 	Latitude   float64 `gorm:"default:null"`
+	Status string `gorm:"default:OPEN"`
 }
 
 func (Store) TableName() string {
