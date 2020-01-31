@@ -13,8 +13,8 @@ type User struct {
 	Email          string
 	Mobile         string
 	Avatar         string
-	Active         bool
-	FirstTimeLogin bool
+	Active         bool `grom:"default:false"`
+	FirstTimeLogin bool `grom:"default:false"`
 	UsePin         bool `grom:"default:false"`
 	Pin            string
 	Profile        Profile `gorm:"foreignkey:ID"`
