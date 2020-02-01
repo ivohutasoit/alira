@@ -22,9 +22,14 @@ func (Customer) TableName() string {
 
 type CustomerUser struct {
 	alira.Model
-	CustomerID string
-	UserID     string
-	Role       string `gorm:"default:STOREADMIN"`
+	CustomerID    string
+	UserID        string
+	Username      string
+	Email         string
+	PrimaryMobile string
+	Role          string `gorm:"default:STOREADMIN"`
+	Active        bool   `gorm:"default:false"`
+	Delete        bool   `gorm:"default:false"`
 }
 
 func (CustomerUser) TableName() string {
@@ -55,7 +60,6 @@ type StoreUser struct {
 	alira.Model
 	CustomerUserID string
 	StoreID        string
-	Role           string `gorm:"default:TELLER"`
 	NotBefore      time.Time
 	NotAfter       time.Time `gorm:"default:null"`
 	Status         string
