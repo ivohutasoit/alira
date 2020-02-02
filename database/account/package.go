@@ -10,11 +10,11 @@ import (
 
 type Subscription struct {
 	alira.Model
-	Class       string `gorm:"default:USERTYPE"`
+	Class       string
 	Code        string
 	Name        string
 	Description string
-	Applicator  string `gorm:"defaulr:null"`
+	Applicator  string `gorm:"default:null"`
 	Subscriber  string `sql:"index"`
 	Signature   string
 	NotBefore   time.Time
