@@ -10,12 +10,10 @@ import (
 
 type Customer struct {
 	alira.Model
-	Class     string `gorm:"default:SHOPOWNER"` // DISTRIBUTOR
-	CreatedBy string
-	UpdatedBy string
-	Code      string
-	Status    string `grom:"default:INACTIVE"`
-	Payment   bool   `grom:"default:false"`
+	Class   string `gorm:"default:SHOPOWNER"` // DISTRIBUTOR
+	Code    string
+	Status  string `grom:"default:INACTIVE"`
+	Payment bool   `grom:"default:false"`
 }
 
 func (Customer) TableName() string {
@@ -24,9 +22,14 @@ func (Customer) TableName() string {
 
 type CustomerUser struct {
 	alira.Model
-	CustomerID string
-	UserID     string
-	Role       string `gorm:"default:STOREADMIN"`
+	CustomerID    string
+	UserID        string
+	Username      string
+	Email         string
+	PrimaryMobile string
+	Role          string `gorm:"default:STOREADMIN"`
+	Active        bool   `gorm:"default:false"`
+	Delete        bool   `gorm:"default:false"`
 }
 
 func (CustomerUser) TableName() string {
@@ -37,6 +40,7 @@ type Store struct {
 	alira.Model
 	CustomerID string
 	Class      string `gorm:"default:GENERAL"`
+	Code       string
 	Name       string
 	Address    string
 	City       string
@@ -46,10 +50,30 @@ type Store struct {
 	Geocode    string  `gorm:"default:null"`
 	Longitude  float64 `gorm:"default:null"`
 	Latitude   float64 `gorm:"default:null"`
+	Status     string  `gorm:"default:OPEN"`
 }
 
 func (Store) TableName() string {
 	return "stores"
+}
+
+type StoreUser struct {
+	alira.Model
+	CustomerUserID string
+	StoreID        string
+	NotBefore      time.Time
+	NotAfter       time.Time `gorm:"default:null"`
+	Status         string
+}
+
+func (model *StoreUser) BeforeCreate(scope *gorm.Scope) error {
+	scope.SetColumn("ID", uuid.New().String())
+	scope.SetColumn("NotBefore", time.Now())
+	return nil
+}
+
+func (StoreUser) TableName() string {
+	return "store_users"
 }
 
 type StoreProduct struct {
@@ -74,6 +98,7 @@ type StoreProductPrice struct {
 	StoreProductID string
 	Quantity       int64 `gorm:"default:0"`
 	Unit           string
+	Currency       string
 	BuyPrice       float64 `gorm:"default:0"`
 	SellPrice      float64 `gorm:"default:0"`
 	NotBefore      time.Time
