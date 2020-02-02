@@ -28,7 +28,7 @@ func (p *Parser) MarshalResponse(response alira.Response, out interface{}) error
 	return nil
 }
 
-func (p *Parser) UnmarshalResponse(data []byte, code int, response alira.Response, out interface{}) error {
+func (p *Parser) UnmarshalResponse(data []byte, code int, response *alira.Response, out interface{}) error {
 	if err := json.Unmarshal(data, &response); err != nil {
 		return err
 	}
