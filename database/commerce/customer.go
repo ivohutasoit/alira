@@ -10,9 +10,9 @@ import (
 
 type Customer struct {
 	alira.Model
-	Class   string `gorm:"default:SHOPOWNER"` // DISTRIBUTOR
+	Class   string `gorm:"default:'SHOPOWNER'"` // DISTRIBUTOR
 	Code    string
-	Status  string `grom:"default:INACTIVE"`
+	Status  string `grom:"default:'INACTIVE'"`
 	Payment bool   `grom:"default:false"`
 }
 
@@ -27,7 +27,7 @@ type CustomerUser struct {
 	Username      string
 	Email         string
 	PrimaryMobile string
-	Role          string `gorm:"default:STOREADMIN"`
+	Role          string `gorm:"default:'STOREADMIN'"`
 	Active        bool   `gorm:"default:false"`
 	Delete        bool   `gorm:"default:false"`
 }
@@ -39,7 +39,7 @@ func (CustomerUser) TableName() string {
 type Store struct {
 	alira.Model
 	CustomerID string
-	Class      string `gorm:"default:GENERAL"`
+	Class      string `gorm:"default:'GENERAL'"`
 	Code       string
 	Name       string
 	Address    string
@@ -50,7 +50,7 @@ type Store struct {
 	Geocode    string  `gorm:"default:null"`
 	Longitude  float64 `gorm:"default:null"`
 	Latitude   float64 `gorm:"default:null"`
-	Status     string  `gorm:"default:OPEN"`
+	Status     string  `gorm:"default:'OPEN'"`
 	Default    bool    `gorm:"default:false"`
 }
 

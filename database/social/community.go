@@ -28,7 +28,7 @@ type Community struct {
 	Geocode         string  `gorm:"default:null"`
 	Longitude       float64 `gorm:"default:null"`
 	Latitude        float64 `gorm:"default:null"`
-	Finance         string  `gorm:"default:none"`
+	Finance         string  `gorm:"default:'NONE'"`
 	Active          bool    `gorm:"default:true"`
 }
 
@@ -42,7 +42,7 @@ type CommunityMember struct {
 	UserID       string
 	Creator      bool
 	Admin        bool
-	JoinBy       string `gorm:"default:invitation"`
+	JoinBy       string `gorm:"default:'INVITE'"`
 	Approved     bool   `gorm:"default:false"`
 	AdditionInfo string
 }

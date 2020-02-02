@@ -10,7 +10,7 @@ import (
 
 type Subscription struct {
 	alira.Model
-	Class       string
+	Class       string `gorm:"default:'USERTYPE'"`
 	Code        string
 	Name        string
 	Description string
