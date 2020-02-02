@@ -40,6 +40,7 @@ type Store struct {
 	alira.Model
 	CustomerID string
 	Class      string `gorm:"default:GENERAL"`
+	Code       string
 	Name       string
 	Address    string
 	City       string
