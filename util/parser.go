@@ -28,19 +28,20 @@ func (p *Parser) MarshalResponse(response alira.Response, out interface{}) error
 	return nil
 }
 
-func (p *Parser) UnmarshalResponse(data []byte, code int, response *alira.Response, out interface{}) error {
+func (p *Parser) UnmarshalResponse(data []byte, code int, out interface{}) (*alira.Response, error) {
+	response := &alira.Response{}
 	if err := json.Unmarshal(data, &response); err != nil {
-		return err
+		return nil, err
 	}
 
 	if response.Code != code {
-		return errors.New(response.Error)
+		return nil, errors.New(response.Error)
 	}
 
 	if out != nil {
 		if err := json.Unmarshal([]byte(response.Data), &out); err != nil {
-			return err
+			return nil, err
 		}
 	}
-	return nil
+	return response, nil
 }
