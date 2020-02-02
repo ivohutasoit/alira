@@ -98,6 +98,7 @@ type StoreProductPrice struct {
 	StoreProductID string
 	Quantity       int64 `gorm:"default:0"`
 	Unit           string
+	Currency       string
 	BuyPrice       float64 `gorm:"default:0"`
 	SellPrice      float64 `gorm:"default:0"`
 	NotBefore      time.Time
