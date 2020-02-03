@@ -77,17 +77,30 @@ func (StoreUser) TableName() string {
 	return "store_users"
 }
 
+type StoreProductCategory struct {
+	alira.Model
+	StoreID     string
+	Code        string
+	Name        string
+	Description string
+}
+
+func (StoreProductCategory) TableName() string {
+	return "storeproduct_categories"
+}
+
 type StoreProduct struct {
 	alira.Model
-	StoreID   string
-	ProductID string
-	Name      string
-	Image     string
-	RackNo    string
-	Available int64 `gorm:"default:0"`
-	Opname    int64 `gorm:"default:0"`
-	Return    int64 `gorm:"default:0"`
-	Sold      int64 `gorm:"default:0"`
+	StoreID    string
+	ProductID  string
+	CategoryID string
+	Name       string
+	Image      string
+	RackNo     string
+	Available  int64 `gorm:"default:0"`
+	Opname     int64 `gorm:"default:0"`
+	Return     int64 `gorm:"default:0"`
+	Sold       int64 `gorm:"default:0"`
 }
 
 func (StoreProduct) TableName() string {
