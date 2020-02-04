@@ -27,7 +27,7 @@ type CustomerUser struct {
 	Username      string
 	Email         string
 	PrimaryMobile string
-	Role          string `gorm:"default:'STOREADMIN'"`
+	Role          string `gorm:"default:'OWNER'"`
 	Active        bool   `gorm:"default:false"`
 	Delete        bool   `gorm:"default:false"`
 }
@@ -62,9 +62,11 @@ type StoreUser struct {
 	alira.Model
 	CustomerUserID string
 	StoreID        string
+	Role           string `gorm:"default:'TELLER'"`
 	NotBefore      time.Time
 	NotAfter       time.Time `gorm:"default:null"`
 	Status         string
+	Active         bool `gorm:"default:false"`
 }
 
 func (model *StoreUser) BeforeCreate(scope *gorm.Scope) error {
