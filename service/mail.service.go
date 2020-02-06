@@ -5,34 +5,17 @@ import (
 	"net/smtp"
 	"os"
 
+	"github.com/ivohutasoit/alira/message"
 	"github.com/ivohutasoit/alira/util"
 )
-
-type Mail struct {
-	From     string
-	To       []string
-	Subject  string
-	Template string
-	Data     map[interface{}]interface{}
-}
 
 const (
 	MIME = "MIME-VERSION: 1.0;\nContent-Type: text/html; charset:\"UTF-8\";\n\n"
 )
 
-func (m *Mail) NewMail(from string, to []string, subject string, template string, data map[interface{}]interface{}) *Mail {
-	return &Mail{
-		From:     from,
-		To:       to,
-		Subject:  subject,
-		Template: template,
-		Data:     data,
-	}
-}
+type Mail struct{}
 
-type MailService struct{}
-
-func (ms *MailService) Send(mail *Mail) (map[interface{}]interface{}, error) {
+func (s *Mail) Send(mail *message.Mail) (map[interface{}]interface{}, error) {
 	mail.From = os.Getenv("SMTP_SENDER")
 	var message string
 	parser := &util.Parser{}
